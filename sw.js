@@ -1,5 +1,5 @@
 // Cache simples para o app abrir mesmo sem internet.
-const CACHE = 'rodalucro-v7';
+const CACHE = 'rodalucro-v8';
 const FILES = ['./', 'index.html', 'completo.html', 'planos.html', 'manifest.webmanifest', 'icon.svg'];
 
 self.addEventListener('install', (e) => {
