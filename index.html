@@ -84,6 +84,11 @@ section[data-tab] { display: flex; flex-direction: column; gap: 16px; }
 .shift .txt b { font-size: 0.95rem; }
 .shift button { flex: none; }
 
+.planbar .txt b { font-size: 0.95rem; }
+.meta-btn { background: transparent; border: 1px solid rgba(255,255,255,.6); color: var(--sign-ink); padding: 4px 10px; border-radius: 8px; }
+.plan-eq { font-size: 0.85rem; opacity: .9; }
+#p-meta.huge { font-size: 1.6rem; }
+
 /* Placa de rodovia */
 .sign { background: var(--sign); color: var(--sign-ink); border-radius: 14px; padding: 6px; }
 .sign-in { border: 2px solid var(--sign-ink); border-radius: 10px; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
@@ -272,6 +277,8 @@ nav.tabs button[aria-current="page"] { color: var(--sign); }
 
   <!-- HOJE -->
   <section data-tab="hoje">
+    <div class="shift planbar" id="plan-bar"></div>
+
     <div class="shift" id="shift">
       <span class="dot" aria-hidden="true"></span>
       <div class="txt"><b id="shift-title">Jornada parada</b><span class="muted" id="shift-sub">Inicie para contar as horas sozinho</span></div>
@@ -285,7 +292,7 @@ nav.tabs button[aria-current="page"] { color: var(--sign); }
             <div class="label">Lucro líquido hoje</div>
             <div class="big" id="h-lucro">R$ 0,00</div>
           </div>
-          <div class="meta-of">meta <span class="num" id="h-meta">R$ 0</span></div>
+          <button type="button" class="meta-of meta-btn" id="h-meta-btn" aria-label="Mudar a meta do dia">meta <span class="num" id="h-meta">R$ 0</span> ✎</button>
         </div>
         <div class="road" role="progressbar" aria-label="Progresso da meta do dia" aria-valuemin="0" aria-valuemax="100" id="h-road"><div class="road-fill" id="h-fill"></div></div>
         <div class="need" id="h-need"></div>
@@ -345,6 +352,33 @@ nav.tabs button[aria-current="page"] { color: var(--sign); }
         <a class="btn" id="wa-day" href="#" target="_blank" rel="noopener">Enviar no WhatsApp</a>
         <button type="button" id="btn-copy-day">Copiar resumo</button>
       </div>
+    </div>
+  </section>
+
+  <!-- PLANEJAR O DIA -->
+  <section data-tab="plano" hidden>
+    <div class="card">
+      <h2 id="p-title">Planejar o dia</h2>
+      <p class="muted">Escolha os apps, a meta e os gastos. O app calcula quanto você precisa fazer.</p>
+      <div class="field"><span class="flabel">Em quais apps vai rodar?</span><div class="chips" id="p-apps"></div></div>
+      <div class="row">
+        <div class="field"><label for="p-data">Dia</label><input id="p-data" type="date"></div>
+        <div class="field"><label for="p-meta">Meta de lucro (R$)</label><input id="p-meta" class="huge" inputmode="decimal" placeholder="300"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Gastos do dia</h2>
+      <p class="muted">Café, combustível, almoço… o que já gastou ou ainda vai gastar. Deixe em branco o que não tiver.</p>
+      <div class="chips" id="p-quick"></div>
+      <div class="xlines" id="p-lines"></div>
+      <button type="button" id="p-add">+ Adicionar outro gasto</button>
+      <div class="xtotal"><span>Total de gastos</span><span class="num" id="p-total">R$ 0,00</span></div>
+    </div>
+    <div class="sign" aria-live="polite"><div class="sign-in" id="p-result"></div></div>
+    <button type="button" class="primary" id="p-start">Salvar e iniciar o dia</button>
+    <div class="row">
+      <button type="button" id="p-save">Só salvar</button>
+      <button type="button" class="ghost" id="p-skip">Agora não</button>
     </div>
   </section>
 
@@ -746,7 +780,7 @@ nav.tabs button[aria-current="page"] { color: var(--sign); }
   }
   function ridesNeeded(falta) {
     const a = averages();
-    const lc = a.ticket - a.kmCorrida * custoKm();
+    const lc = state.settings.modoComb === 'km' ? a.ticket - a.kmCorrida * custoKm() : a.ticket;
     if (falta <= 0) return { done: true };
     if (lc <= 0) return { loss: true };
     const n = Math.ceil(falta / lc);
@@ -790,14 +824,16 @@ nav.tabs button[aria-current="page"] { color: var(--sign); }
     const s = state.settings;
     const t = dayStats(dayKey());
     $('h-lucro').textContent = brl(t.lucro);
-    $('h-meta').textContent = brl0(s.meta);
-    setRoad('h-road', 'h-fill', pct(t.lucro, s.meta));
+    const meta = dayMeta(dayKey());
+    $('h-meta').textContent = brl0(meta);
+    setRoad('h-road', 'h-fill', pct(t.lucro, meta));
 
-    const r = ridesNeeded(s.meta - t.lucro);
+    const r = ridesNeeded(meta - t.lucro);
     let need;
-    if (r.done) need = 'Meta batida! 🎉<small>Você passou ' + brl(t.lucro - s.meta) + ' da meta de hoje.</small>';
-    else if (r.loss) need = 'Faltam ' + brl(s.meta - t.lucro) + '<small>Seu ganho médio por corrida não cobre o combustível. Revise o mínimo por km.</small>';
-    else need = 'Faltam ' + r.n + ' corrida' + (r.n > 1 ? 's' : '') + '<small>' + brl(s.meta - t.lucro) + ' · cerca de ' + hm(r.horas) + ' de trabalho · ' + brl(r.lc) + ' de lucro por corrida</small>';
+    if (r.done) need = 'Meta batida! 🎉<small>Você passou ' + brl(t.lucro - meta) + ' da meta de hoje.</small>';
+    else if (r.loss) need = 'Faltam ' + brl(meta - t.lucro) + '<small>Seu ganho médio por corrida não cobre o combustível. Revise o mínimo por km.</small>';
+    else need = 'Faltam ' + r.n + ' corrida' + (r.n > 1 ? 's' : '') + '<small>Faturar mais ' + brl(meta - t.lucro) + ' (meta + gastos) · cerca de ' + hm(r.horas) + ' de trabalho</small>';
+    renderPlanBar(t, meta);
     $('h-need').innerHTML = need;
 
     $('t-bruto').textContent = brl(t.bruto);
@@ -824,19 +860,30 @@ nav.tabs button[aria-current="page"] { color: var(--sign); }
     // 7 dias
     const days = [];
     for (let i = -6; i <= 0; i++) { const d = addDays(i); days.push({ d, t: dayStats(dayKey(d)), today: i === 0 }); }
-    const max = Math.max(s.meta, ...days.map((x) => Math.abs(x.t.lucro)), 1);
+    const metaHoje = dayMeta(dayKey());
+    const max = Math.max(metaHoje, ...days.map((x) => Math.abs(x.t.lucro)), 1);
     const H = 100;
     $('week').innerHTML = days.map((x) => {
       const v = x.t.lucro, h = Math.max(2, (Math.abs(v) / max) * H);
       const lab = x.d.toLocaleDateString('pt-BR', { weekday: 'short' }).replace('.', '');
       return '<div class="bar-wrap"><span class="v num">' + (Math.round(v) || '') + '</span><div class="bar' + (x.today ? ' today' : '') + (v < 0 ? ' neg' : '') + '" style="height:' + h + 'px" title="' + brl(v) + '"></div><span class="d">' + (x.today ? 'hoje' : lab) + '</span></div>';
-    }).join('') + '<div class="metaline" style="bottom:' + (19 + (s.meta / max) * H) + 'px"><span>meta</span></div>';
+    }).join('') + '<div class="metaline" style="bottom:' + (19 + (metaHoje / max) * H) + 'px"><span>meta</span></div>';
     const tot = days.reduce((acc, x) => acc + x.t.lucro, 0);
-    const hit = days.filter((x) => x.t.lucro >= s.meta).length;
+    const hit = days.filter((x) => x.t.lucro >= dayMeta(x.t.key)).length;
     $('week-sum').innerHTML = 'Lucro em 7 dias: <b>' + brl(tot) + '</b> · meta do dia batida em <b>' + hit + '</b> de 7';
 
     renderDay();
     renderMaint();
+  }
+
+  function renderPlanBar(t, meta) {
+    const p = dayPlan(dayKey()), bar = $('plan-bar');
+    if (p) {
+      const g = (p.costIds || []).map((id) => state.entries.find((e) => e.id === id)).filter(Boolean).reduce((s, e) => s + e.valor, 0);
+      bar.innerHTML = '<div class="txt"><b>Plano: ' + p.apps.map(esc).join(' · ') + '</b><span class="muted">Meta ' + brl0(meta) + ' + gastos ' + brl0(g) + ' = fazer <b>' + brl0(meta + g) + '</b></span></div><button type="button" class="small" data-plan>Editar</button>';
+    } else {
+      bar.innerHTML = '<div class="txt"><b>Sem plano para hoje</b><span class="muted">Escolha os apps, a meta e os gastos do dia.</span></div><button type="button" class="small primary" data-plan>Planejar o dia</button>';
+    }
   }
 
   // ---------- histórico por dia ----------
@@ -897,15 +944,16 @@ nav.tabs button[aria-current="page"] { color: var(--sign); }
 
   // ---------- resumos para WhatsApp ----------
   function dayText(key) {
-    const s = state.settings, t = dayStats(key);
-    const falta = s.meta - t.lucro;
+    const t = dayStats(key), meta = dayMeta(key), plan = dayPlan(key);
+    const falta = meta - t.lucro;
     return ['🚗 *RodaLucro* · ' + shortDate(key),
       'Faturamento: ' + brl(t.bruto),
       'Combustível: ' + brl(t.comb),
       'Outros gastos: ' + brl(t.gastos),
       '*Lucro líquido: ' + brl(t.lucro) + '*',
       t.corridas + ' corridas · ' + dec(t.km, 0) + ' km' + (t.horas > 0.05 ? ' · ' + hm(t.horas) + ' · ' + brl(t.lucro / t.horas) + '/hora' : ''),
-      falta <= 0 ? '✅ Meta do dia (' + brl0(s.meta) + ') batida!' : '🎯 Meta ' + brl0(s.meta) + ': faltaram ' + brl(falta)].join('\n');
+      falta <= 0 ? '✅ Meta do dia (' + brl0(meta) + ') batida!' : '🎯 Meta ' + brl0(meta) + ': ' + (key === dayKey() ? 'faltam ' : 'faltaram ') + brl(falta),
+      plan ? 'Apps: ' + plan.apps.join(', ') : ''].filter(Boolean).join('\n');
   }
   function monthText() {
     const s = state.settings, now = new Date();
@@ -994,29 +1042,31 @@ nav.tabs button[aria-current="page"] { color: var(--sign); }
     const c = km * custoKm();
     $('g-preview').innerHTML = 'Combustível estimado: <b>' + brl(c) + '</b>' + (v > 0 ? ' · lucro: <b>' + brl(v - c) + '</b>' : '');
   }
-  // ---------- várias linhas de gasto ----------
-  function addLine(cat) {
+  // ---------- várias linhas de gasto (tela Gastos 'x' e Planejar o dia 'p') ----------
+  const BOX = { x: { lines: 'x-lines', total: 'x-total', save: 'x-save', quick: 'x-quick', add: 'x-add' },
+                p: { lines: 'p-lines', total: 'p-total', quick: 'p-quick', add: 'p-add' } };
+  function addLine(cat, box = 'x', pre = {}) {
     const id = uid();
     const div = document.createElement('div');
     div.className = 'xline'; div.dataset.line = id;
     div.innerHTML =
       '<div class="xline-top">' +
         '<div class="field"><label for="xc-' + id + '">Categoria</label><select id="xc-' + id + '" data-k="cat">' + CATS.map((c) => '<option' + (c === cat ? ' selected' : '') + '>' + c + '</option>').join('') + '</select></div>' +
-        '<div class="field"><label for="xv-' + id + '">Valor (R$)</label><input id="xv-' + id + '" data-k="valor" inputmode="decimal" placeholder="0,00"></div>' +
+        '<div class="field"><label for="xv-' + id + '">Valor (R$)</label><input id="xv-' + id + '" data-k="valor" inputmode="decimal" placeholder="0,00" value="' + (pre.valor > 0 ? dec(pre.valor, 2) : '') + '"></div>' +
         '<button type="button" class="x" data-rm aria-label="Remover este gasto">×</button>' +
       '</div>' +
       '<div class="fuel"' + (cat === FUEL ? '' : ' hidden') + '>' +
-        '<div class="field"><label for="xp-' + id + '">Preço do ' + (fuelUn() === 'm³' ? 'm³' : 'litro') + ' (R$)</label><input id="xp-' + id + '" data-k="preco" inputmode="decimal" value="' + dec(state.settings.preco, 2) + '"></div>' +
-        '<div class="field"><label for="xo-' + id + '">Km do painel (opcional)</label><input id="xo-' + id + '" data-k="odo" inputmode="numeric" placeholder="84.520"></div>' +
+        '<div class="field"><label for="xp-' + id + '">Preço do ' + (fuelUn() === 'm³' ? 'm³' : 'litro') + ' (R$)</label><input id="xp-' + id + '" data-k="preco" inputmode="decimal" value="' + dec(pre.preco > 0 ? pre.preco : state.settings.preco, 2) + '"></div>' +
+        '<div class="field"><label for="xo-' + id + '">Km do painel (opcional)</label><input id="xo-' + id + '" data-k="odo" inputmode="numeric" placeholder="84.520" value="' + (pre.odo > 0 ? dec(pre.odo, 0) : '') + '"></div>' +
         '<div class="fuelcalc muted" data-fuelcalc style="grid-column:1/-1"></div>' +
       '</div>' +
-      '<div class="field nota"' + (cat === FUEL ? ' hidden' : '') + '><label for="xn-' + id + '">Observação (opcional)</label><input id="xn-' + id + '" data-k="nota" placeholder="ex.: almoço"></div>';
-    $('x-lines').appendChild(div);
-    updateLines();
+      '<div class="field nota"' + (cat === FUEL ? ' hidden' : '') + '><label for="xn-' + id + '">Observação (opcional)</label><input id="xn-' + id + '" data-k="nota" placeholder="ex.: almoço" value="' + esc(pre.nota || '') + '"></div>';
+    $(BOX[box].lines).appendChild(div);
+    updateLines(box);
     return div;
   }
-  function readLines() {
-    return [...document.querySelectorAll('#x-lines .xline')].map((el) => {
+  function readLines(box = 'x') {
+    return [...document.querySelectorAll('#' + BOX[box].lines + ' .xline')].map((el) => {
       const g = (k) => el.querySelector('[data-k="' + k + '"]');
       const valor = num(g('valor').value), preco = num(g('preco').value);
       return { el, cat: g('cat').value, valor, preco, litros: valor > 0 && preco > 0 ? valor / preco : NaN, odo: num(g('odo').value), nota: g('nota').value.trim() };
@@ -1030,8 +1080,8 @@ nav.tabs button[aria-current="page"] { color: var(--sign); }
     const un = fuelUn(), km = l.litros * state.settings.kml, a = averages();
     return '≈ <b>' + dec(l.litros) + ' ' + un + '</b> · rende ≈ <b>' + dec(km, 0) + ' km</b> (consumo de ' + dec(state.settings.kml) + ' km/' + (un === 'm³' ? 'm³' : 'l') + ') · dá para ≈ <b>' + Math.floor(km / a.kmCorrida) + ' corridas</b>';
   }
-  function updateLines() {
-    const lines = readLines();
+  function updateLines(box = 'x') {
+    const B = BOX[box], lines = readLines(box);
     lines.forEach((l) => {
       l.el.querySelector('.fuel').hidden = l.cat !== FUEL;
       l.el.querySelector('.nota').hidden = l.cat === FUEL;
@@ -1040,24 +1090,104 @@ nav.tabs button[aria-current="page"] { color: var(--sign); }
     });
     const tot = lines.reduce((s, l) => s + (l.valor > 0 ? l.valor : 0), 0);
     const n = lines.filter((l) => l.valor > 0).length;
-    $('x-total').textContent = brl(tot);
-    $('x-save').textContent = n > 1 ? 'Salvar ' + n + ' gastos' : 'Salvar gasto';
+    $(B.total).textContent = brl(tot);
+    if (B.save) $(B.save).textContent = n > 1 ? 'Salvar ' + n + ' gastos' : 'Salvar gasto';
+    if (box === 'p') renderPlanResult();
   }
-  function resetLines() { $('x-lines').innerHTML = ''; addLine(FUEL); }
-  $('x-quick').innerHTML = CATS.slice(0, 6).map((c) => '<button type="button" data-qc="' + c + '">+ ' + c + '</button>').join('');
-  $('x-quick').addEventListener('click', (ev) => {
-    const b = ev.target.closest('[data-qc]'); if (!b) return;
-    // reaproveita uma linha vazia, senão cria outra
-    const empty = readLines().find((l) => !(l.valor > 0));
-    let el;
-    if (empty) { empty.el.querySelector('[data-k="cat"]').value = b.dataset.qc; el = empty.el; updateLines(); }
-    else el = addLine(b.dataset.qc);
-    el.querySelector('[data-k="valor"]').focus();
-  });
-  $('x-add').addEventListener('click', () => { addLine('Alimentação').querySelector('[data-k="valor"]').focus(); });
-  $('x-lines').addEventListener('input', updateLines);
-  $('x-lines').addEventListener('change', updateLines);
-  $('x-lines').addEventListener('click', (ev) => { const rm = ev.target.closest('[data-rm]'); if (rm) { rm.closest('.xline').remove(); updateLines(); } });
+  function resetLines(box = 'x', list) {
+    $(BOX[box].lines).innerHTML = '';
+    (list || [[FUEL, {}]]).forEach(([c, pre]) => addLine(c, box, pre));
+  }
+  function bindLines(box) {
+    const B = BOX[box];
+    $(B.quick).innerHTML = CATS.slice(0, 6).map((c) => '<button type="button" data-qc="' + c + '">+ ' + c + '</button>').join('');
+    $(B.quick).addEventListener('click', (ev) => {
+      const b = ev.target.closest('[data-qc]'); if (!b) return;
+      // reaproveita uma linha vazia, senão cria outra
+      const empty = readLines(box).find((l) => !(l.valor > 0) && !l.nota);
+      let el;
+      if (empty) { empty.el.querySelector('[data-k="cat"]').value = b.dataset.qc; el = empty.el; updateLines(box); }
+      else el = addLine(b.dataset.qc, box);
+      el.querySelector('[data-k="valor"]').focus();
+    });
+    $(B.add).addEventListener('click', () => { addLine('Alimentação', box).querySelector('[data-k="valor"]').focus(); });
+    $(B.lines).addEventListener('input', () => updateLines(box));
+    $(B.lines).addEventListener('change', () => updateLines(box));
+    $(B.lines).addEventListener('click', (ev) => { const rm = ev.target.closest('[data-rm]'); if (rm) { rm.closest('.xline').remove(); updateLines(box); } });
+  }
+  bindLines('x'); bindLines('p');
+
+  // ---------- planejar o dia ----------
+  const dayPlan = (key) => (state.plans || {})[key] || null;
+  const dayMeta = (key) => { const p = dayPlan(key); return p && p.meta > 0 ? p.meta : state.settings.meta; };
+  let planDate = dayKey();
+  function openPlan(key) {
+    planDate = key || dayKey();
+    const p = dayPlan(planDate);
+    const apps = p ? p.apps : (state.settings.planApps || [state.settings.ultimoApp || 'Uber']);
+    $('p-apps').innerHTML = APPS.map((a) => '<button type="button" data-papp="' + a + '" aria-pressed="' + apps.includes(a) + '">' + a + '</button>').join('');
+    $('p-data').value = planDate;
+    $('p-meta').value = dec(p ? p.meta : state.settings.meta, 2);
+    const costs = p ? (p.costIds || []).map((id) => state.entries.find((e) => e.id === id)).filter(Boolean) : [];
+    if (costs.length) resetLines('p', costs.map((e) => e.type === 'abast' ? [FUEL, { valor: e.valor, preco: e.litros ? e.valor / e.litros : 0, odo: e.odo }] : [e.cat, { valor: e.valor, nota: e.nota }]));
+    else resetLines('p', [[FUEL, {}], ['Alimentação', { nota: 'café da manhã' }], ['Alimentação', { nota: 'almoço' }]]);
+    $('p-title').textContent = planDate === dayKey() ? 'Planejar o dia de hoje' : 'Planejar o dia ' + shortDate(planDate);
+    go('plano');
+  }
+  function planNumbers() {
+    const meta = num($('p-meta').value);
+    const gastos = readLines('p').reduce((s, l) => s + (l.valor > 0 ? l.valor : 0), 0);
+    const a = averages(), byKm = state.settings.modoComb === 'km';
+    const lc = byKm ? a.ticket - a.kmCorrida * custoKm() : a.ticket;
+    if (!(meta > 0) || lc <= 0) return { meta, gastos, ok: false };
+    const n = Math.ceil((meta + gastos) / lc);
+    const comb = byKm ? n * a.kmCorrida * custoKm() : 0;
+    return { meta, gastos, comb, fazer: meta + gastos + comb, n, horas: n * a.horasCorrida, km: n * a.kmCorrida, ticket: a.ticket, ok: true };
+  }
+  function renderPlanResult() {
+    const r = planNumbers(), box = $('p-result');
+    if (!box) return;
+    if (!r.ok) { box.innerHTML = '<span class="label">Resultado</span><div class="need">Digite a sua meta de lucro<small>e os gastos do dia para ver quanto precisa fazer.</small></div>'; return; }
+    box.innerHTML = '<span class="label">Para lucrar ' + brl(r.meta) + ' limpo, você precisa fazer</span>' +
+      '<div class="big">' + brl(r.fazer) + '</div>' +
+      '<div class="plan-eq num">' + brl(r.meta) + ' de meta + ' + brl(r.gastos) + ' de gastos' + (r.comb ? ' + ' + brl(r.comb) + ' de combustível (km)' : '') + '</div>' +
+      '<div class="need">≈ ' + r.n + ' corridas<small>cerca de ' + hm(r.horas) + ' de trabalho e ' + dec(r.km, 0) + ' km · ticket médio de ' + brl(r.ticket) + '</small></div>';
+  }
+  function savePlan(startShift) {
+    const meta = num($('p-meta').value);
+    if (!(meta > 0)) { toast('Digite a meta de lucro do dia'); $('p-meta').focus(); return; }
+    const apps = [...$('p-apps').querySelectorAll('[aria-pressed="true"]')].map((b) => b.dataset.papp);
+    if (!apps.length) { toast('Escolha pelo menos um app'); return; }
+    const r = planNumbers();
+    leaveSample();
+    const key = $('p-data').value || planDate;
+    const old = dayPlan(planDate);
+    if (old) state.entries = state.entries.filter((e) => !(old.costIds || []).includes(e.id));
+    if (planDate !== key && state.plans) delete state.plans[planDate];
+    const costIds = [];
+    readLines('p').filter((l) => l.valor > 0).forEach((l) => {
+      const id = uid(); costIds.push(id);
+      if (l.cat === FUEL) {
+        if (l.preco > 0) state.settings.preco = +l.preco.toFixed(3);
+        state.entries.push({ id, date: key, type: 'abast', valor: l.valor, litros: l.litros > 0 ? +l.litros.toFixed(2) : null, odo: l.odo > 0 ? l.odo : null });
+      } else state.entries.push({ id, date: key, type: 'gasto', cat: l.cat, valor: l.valor, nota: l.nota });
+    });
+    state.plans = state.plans || {};
+    state.plans[key] = { apps, meta, costIds };
+    state.settings.planApps = apps;
+    if (!apps.includes(state.settings.ultimoApp)) state.settings.ultimoApp = apps[0];
+    if (startShift && !state.shift && key === dayKey()) state.shift = { start: Date.now(), odo: null };
+    save(); renderAll(); viewDay = key; go('hoje');
+    toast('Plano salvo · precisa fazer ' + brl(r.fazer || meta) + (r.n ? ' (≈ ' + r.n + ' corridas)' : '') + (startShift ? ' · bom trabalho!' : ''));
+  }
+  $('p-apps').addEventListener('click', (ev) => { const b = ev.target.closest('[data-papp]'); if (b) b.setAttribute('aria-pressed', b.getAttribute('aria-pressed') !== 'true'); });
+  $('p-meta').addEventListener('input', renderPlanResult);
+  $('p-data').addEventListener('change', () => { const k = $('p-data').value; if (k && dayPlan(k)) openPlan(k); });
+  $('p-start').addEventListener('click', () => savePlan(true));
+  $('p-save').addEventListener('click', () => savePlan(false));
+  $('p-skip').addEventListener('click', () => { state.planSkip = dayKey(); save(); go('hoje'); });
+  $('plan-bar').addEventListener('click', (ev) => { if (ev.target.closest('[data-plan]')) openPlan(dayKey()); });
+  $('h-meta-btn').addEventListener('click', () => openPlan(dayKey()));
 
   function renderCalc() {
     const s = state.settings;
@@ -1162,7 +1292,7 @@ nav.tabs button[aria-current="page"] { color: var(--sign); }
     document.querySelectorAll('[data-form]').forEach((f) => (f.hidden = f.dataset.form !== b.dataset.seg));
   }));
 
-  function leaveSample() { if (state.sample) { state.entries = []; state.shift = null; state.sample = false; } }
+  function leaveSample() { if (state.sample) { state.entries = []; state.plans = {}; state.shift = null; state.sample = false; } }
   function addEntry(e) { leaveSample(); state.entries.push({ id: uid(), ...e }); save(); renderAll(); }
 
   // folha inferior: corrida rápida e jornada
@@ -1175,6 +1305,7 @@ nav.tabs button[aria-current="page"] { color: var(--sign); }
     list.map((o) => '<option' + (o === value ? ' selected' : '') + '>' + esc(o) + '</option>').join('') + '</select></div>';
   const v2 = (n, d = 2) => (n > 0 ? dec(n, d) : '');
 
+  const rideApps = () => { const p = dayPlan(dayKey()); return p && p.apps.length ? p.apps : APPS.slice(0, 4); };
   function openSheet(mode, arg) {
     sheetMode = mode; sheetArg = arg;
     const body = $('sheet-body');
@@ -1230,7 +1361,7 @@ nav.tabs button[aria-current="page"] { color: var(--sign); }
       const last = state.settings.ultimoApp;
       body.innerHTML =
         '<div class="field"><label for="q-valor">Quanto recebeu (R$)</label><input id="q-valor" class="huge" inputmode="decimal" placeholder="0,00"></div>' +
-        '<div class="field"><span class="flabel">App</span><div class="chips" id="q-apps">' + APPS.slice(0, 4).map((a) => '<button type="button" data-app="' + a + '" aria-pressed="' + (a === last) + '">' + a + '</button>').join('') + '</div></div>' +
+        '<div class="field"><span class="flabel">App</span><div class="chips" id="q-apps">' + rideApps().map((a, i, arr) => '<button type="button" data-app="' + a + '" aria-pressed="' + (a === last || (!arr.includes(last) && i === 0)) + '">' + a + '</button>').join('') + '</div></div>' +
         '<div class="field"><label for="q-km">Km da corrida (opcional)</label><input id="q-km" inputmode="decimal" placeholder="' + dec(averages().kmCorrida, 0) + '"></div>';
       $('q-apps').addEventListener('click', (ev) => {
         const b = ev.target.closest('[data-app]'); if (!b) return;
@@ -1281,7 +1412,8 @@ nav.tabs button[aria-current="page"] { color: var(--sign); }
       if (!(preco > 0 && kml > 0 && meta > 0)) { toast('Preencha os três campos'); return; }
       Object.assign(state.settings, { combTipo: tipo, preco, kml, meta, metaSemana: Math.round(meta * 6), metaMes: Math.round(meta * 25) });
       state.entries = []; state.shift = null; state.sample = false; state.onboarded = true;
-      save(); closeSheet(); renderAll(); go('hoje'); toast('Tudo pronto! Toque em Iniciar dia quando começar a rodar');
+      state.plans = {};
+      save(); closeSheet(); renderAll(); openPlan(dayKey()); toast('Tudo pronto! Agora planeje o seu dia');
     } else if (sheetMode === 'oleo') {
       const odo = num($('o-odo').value), valor = num($('o-valor').value);
       if (!(odo > 0)) { toast('Informe o km do painel'); return; }
@@ -1297,7 +1429,7 @@ nav.tabs button[aria-current="page"] { color: var(--sign); }
       state.settings.ultimoApp = app;
       addEntry({ date: dayKey(), type: 'ganho', app, valor, corridas: 1, km: km > 0 ? km : +averages().kmCorrida.toFixed(1), horas: 0 });
       closeSheet();
-      const t = dayStats(dayKey()), r = ridesNeeded(state.settings.meta - t.lucro);
+      const t = dayStats(dayKey()), r = ridesNeeded(dayMeta(dayKey()) - t.lucro);
       toast('Corrida salva · ' + (r.done ? 'meta do dia batida! 🎉' : r.n ? 'faltam ' + r.n + ' corridas' : 'lucro hoje ' + brl(t.lucro)));
     } else if (sheetMode === 'iniciar') {
       leaveSample();
@@ -1408,6 +1540,8 @@ nav.tabs button[aria-current="page"] { color: var(--sign); }
     if (!(res >= 0) || !(oi > 0)) { toast('Confira a reserva por km e o intervalo do óleo'); return; }
     v.res = res; v.oleoInt = oi;
     if (ou > 0 && ou !== state.settings.oleoUlt) { v.oleoUlt = ou; v.oleoData = dayKey(); } else if (!(ou > 0)) { v.oleoUlt = null; v.oleoData = null; }
+    const hoje = dayPlan(dayKey());
+    if (hoje && v.meta !== state.settings.meta) hoje.meta = v.meta; // a meta nova vale também para o plano de hoje
     Object.assign(state.settings, v); save(); renderAll(); toast('Ajustes salvos');
   });
   $('s-tipo').innerHTML = Object.entries(COMBS).map(([k, c]) => '<option value="' + k + '">' + c.nome + ' · média ' + brl(c.preco) + '</option>').join('');
@@ -1456,6 +1590,7 @@ nav.tabs button[aria-current="page"] { color: var(--sign); }
   state.settings = { ...DEFAULTS, ...(state.settings || {}) };
   state.entries = state.entries || [];
   state.shift = state.shift || null;
+  state.plans = state.plans || {};
   $('g-app').innerHTML = APPS.map((a) => '<option>' + a + '</option>').join('');
   ['g-data', 'x-data'].forEach((id) => ($(id).value = dayKey()));
   resetLines();
@@ -1463,6 +1598,7 @@ nav.tabs button[aria-current="page"] { color: var(--sign); }
   const start = (location.hash || '').slice(1);
   go(['hoje', 'lancar', 'calcular', 'relatorio', 'ajustes'].includes(start) ? start : 'hoje');
   if (!state.onboarded) openSheet('onboard');
+  else if (!state.sample && !dayPlan(dayKey()) && state.planSkip !== dayKey()) openPlan(dayKey());
 
   // atualiza o relógio da jornada
   setInterval(() => { if (state.shift) { renderShift(); renderHoje(); } }, 30000);
