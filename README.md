@@ -13,6 +13,12 @@ Protótipo de app para motoristas de aplicativo (Uber, 99, inDrive) acompanharem
 - **Calcular:** "vale a pena aceitar a corrida?", "etanol ou gasolina?" e "quanto preciso rodar para ganhar R$ X?".
 - **Relatório mensal:** lucro, dias rodados, melhor dia, qual app rendeu mais e para onde foi o dinheiro.
 - **Aparência:** tema claro/escuro e letra grande.
+- **Primeiro acesso guiado:** configura combustível, consumo e meta em 30 segundos (ou mostra um exemplo).
+- **Histórico e correção:** navegue pelos dias e toque num lançamento para corrigir ou apagar.
+- **Manutenção:** reserva por km para óleo, pneu e revisão, e aviso da próxima troca de óleo.
+- **Resumo para WhatsApp:** do dia e do mês, para enviar ou copiar.
+- **Backup:** baixar ou copiar os dados e restaurar em outro celular.
+- **Página de vendas:** `planos.html`, com planos Grátis e Pro.
 
 Funciona como PWA: abra no celular e use "Adicionar à tela inicial".
 
@@ -30,6 +36,7 @@ Para publicar de graça, ative o **GitHub Pages** (Settings → Pages → branch
 ## Arquivos
 
 - `index.html`: o app inteiro (telas, estilos e lógica)
+- `planos.html`: página de vendas. Para o botão "Quero o Pro" abrir o seu WhatsApp, preencha `const WHATSAPP = ''` no fim do arquivo (ex.: `'5511999999999'`)
 - `manifest.webmanifest`, `icon.svg`, `sw.js`: instalação no celular e uso sem internet
 
 ## Próximos passos
