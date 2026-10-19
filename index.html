@@ -30,7 +30,9 @@
   --font-body: "Overpass", system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-num: "Overpass Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
   --r: 12px;
+  font-size: 16px;
 }
+:root.big { font-size: 18.5px; }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --bg: #0e1412; --surface: #161f1c; --ink: #e5ede9; --muted: #93a39d; --line: #26332e;
@@ -44,56 +46,75 @@
   --good: #3cc483; --warn: #e3a63a; --bad: #ef6b5b; color-scheme: dark;
 }
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 html, body { margin: 0; }
 body {
   background: var(--bg); color: var(--ink);
-  font-family: var(--font-body); font-size: 15px; line-height: 1.45;
+  font-family: var(--font-body); font-size: 0.95rem; line-height: 1.45;
   -webkit-font-smoothing: antialiased;
 }
 main {
   max-width: 560px; margin: 0 auto;
   padding-left: max(16px, env(safe-area-inset-left, 0px));
   padding-right: max(16px, env(safe-area-inset-right, 0px));
-  padding-block: 16px calc(96px + env(safe-area-inset-bottom, 0px));
+  padding-block: 16px calc(100px + env(safe-area-inset-bottom, 0px));
   display: flex; flex-direction: column; gap: 16px;
 }
 header.top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-.brand { font-family: var(--font-display); font-weight: 900; font-size: 22px; letter-spacing: -0.01em; display: flex; align-items: center; gap: 8px; }
-.brand svg { width: 28px; height: 28px; }
-.date { color: var(--muted); font-size: 13px; text-transform: capitalize; }
-h2 { font-family: var(--font-display); font-weight: 800; font-size: 18px; margin: 0; text-wrap: balance; }
-.label { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.brand { font-family: var(--font-display); font-weight: 900; font-size: 1.4rem; letter-spacing: -0.01em; display: flex; align-items: center; gap: 8px; }
+.brand svg { width: 1.75rem; height: 1.75rem; }
+.date { color: var(--muted); font-size: 0.8rem; text-transform: capitalize; text-align: right; }
+h2 { font-family: var(--font-display); font-weight: 800; font-size: 1.12rem; margin: 0; text-wrap: balance; }
+h3 { font-family: var(--font-display); font-weight: 800; font-size: 0.95rem; margin: 0; }
+p { margin: 0; }
+.label { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
 .num { font-family: var(--font-num); font-variant-numeric: tabular-nums; }
+.muted { color: var(--muted); font-size: 0.82rem; }
+.muted b { color: var(--ink); }
 section[data-tab] { display: flex; flex-direction: column; gap: 16px; }
 
-/* Aviso de exemplo */
 .sample { display: flex; gap: 12px; align-items: center; justify-content: space-between; flex-wrap: wrap;
-  border: 1px dashed var(--warn); color: var(--ink); border-radius: var(--r); padding: 10px 12px; font-size: 13px; }
+  border: 1px dashed var(--warn); border-radius: var(--r); padding: 10px 12px; font-size: 0.82rem; }
+
+/* Jornada */
+.shift { display: flex; align-items: center; gap: 12px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 10px 12px; }
+.shift .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--muted); flex: none; }
+.shift.on .dot { background: var(--good); box-shadow: 0 0 0 4px color-mix(in srgb, var(--good) 25%, transparent); }
+.shift .txt { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.shift .txt b { font-size: 0.95rem; }
+.shift button { flex: none; }
 
 /* Placa de rodovia */
-.sign {
-  background: var(--sign); color: var(--sign-ink); border-radius: 14px; padding: 6px;
-}
+.sign { background: var(--sign); color: var(--sign-ink); border-radius: 14px; padding: 6px; }
 .sign-in { border: 2px solid var(--sign-ink); border-radius: 10px; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
 .sign .label { color: var(--sign-ink); opacity: 0.85; }
 .sign-row { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; flex-wrap: wrap; }
-.big { font-family: var(--font-num); font-weight: 700; font-size: 40px; line-height: 1; letter-spacing: -0.02em; }
-.meta-of { font-family: var(--font-display); font-weight: 600; font-size: 15px; }
+.big { font-family: var(--font-num); font-weight: 700; font-size: 2.5rem; line-height: 1; letter-spacing: -0.02em; }
+.meta-of { font-family: var(--font-display); font-weight: 600; font-size: 0.95rem; }
 .road { position: relative; height: 22px; background: var(--asphalt); border-radius: 4px; overflow: hidden; }
+.road.thin { height: 12px; }
 .road::after { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 2px; transform: translateY(-50%);
   background: repeating-linear-gradient(90deg, rgba(255,255,255,.55) 0 14px, transparent 14px 26px); }
+.road.thin::after { height: 1px; }
 .road-fill { position: absolute; inset: 0 auto 0 0; background: var(--mark); width: 0; transition: width .5s ease; z-index: 1; }
-.need { font-family: var(--font-display); font-weight: 800; font-size: 20px; line-height: 1.2; text-wrap: balance; }
-.need small { display: block; font-weight: 400; font-size: 14px; opacity: .9; margin-top: 2px; }
+.need { font-family: var(--font-display); font-weight: 800; font-size: 1.25rem; line-height: 1.2; text-wrap: balance; }
+.need small { display: block; font-weight: 400; font-size: 0.88rem; opacity: .9; margin-top: 2px; }
+
+.add-ride { width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 1.15rem; padding: 16px; border-radius: 14px; }
+.add-ride svg { width: 1.5rem; height: 1.5rem; }
 
 /* Indicadores */
 .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
 .tile { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 10px 12px; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-.tile .num { font-size: 17px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tile .num { font-size: 0.92rem; font-weight: 700; letter-spacing: -0.03em; overflow-wrap: anywhere; }
 .tile.neg .num { color: var(--bad); }
 @media (max-width: 380px) { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 
 .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.goal { display: flex; flex-direction: column; gap: 6px; }
+.goal-head { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+.goal-head b { font-size: 0.95rem; }
+.goal-head .num { font-size: 0.85rem; }
 
 /* Semana */
 .week { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; align-items: end; height: 140px; position: relative; padding-top: 4px; }
@@ -101,69 +122,115 @@ section[data-tab] { display: flex; flex-direction: column; gap: 16px; }
 .week .bar { width: 100%; max-width: 34px; background: var(--sign); border-radius: 4px 4px 0 0; min-height: 2px; }
 .week .bar.today { background: var(--mark); }
 .week .bar.neg { background: var(--bad); }
-.week .v { font-size: 10px; color: var(--muted); }
-.week .d { font-size: 11px; color: var(--muted); text-transform: lowercase; }
+.week .v { font-size: 0.62rem; color: var(--muted); }
+.week .d { font-size: 0.7rem; color: var(--muted); text-transform: lowercase; height: 15px; }
 .week .metaline { position: absolute; left: 0; right: 0; border-top: 2px dashed var(--mark); pointer-events: none; }
-.week .metaline span { position: absolute; right: 0; top: -18px; font-size: 10px; color: var(--muted); background: var(--surface); padding: 0 4px; }
+.week .metaline span { position: absolute; right: 0; top: -18px; font-size: 0.62rem; color: var(--muted); background: var(--surface); padding: 0 4px; }
 
 /* Lista */
 .list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
 .list li { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-top: 1px solid var(--line); }
 .list li:first-child { border-top: 0; }
-.chip { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; background: var(--bg); border: 1px solid var(--line); white-space: nowrap; }
+.chip { font-size: 0.7rem; font-weight: 700; padding: 2px 8px; border-radius: 999px; background: var(--bg); border: 1px solid var(--line); white-space: nowrap; }
 .chip.in { color: var(--good); border-color: currentColor; }
 .chip.out { color: var(--bad); border-color: currentColor; }
-.list .desc { flex: 1; min-width: 0; font-size: 13px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.list .amt { font-weight: 700; }
-.empty { color: var(--muted); font-size: 14px; }
+.chip.info { color: var(--muted); }
+.list .desc { flex: 1; min-width: 0; font-size: 0.82rem; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.list .amt { font-weight: 700; white-space: nowrap; }
+.empty { color: var(--muted); font-size: 0.88rem; }
 
 /* Formulários */
 form { display: flex; flex-direction: column; gap: 12px; }
 .row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.row3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 400px) { .row3 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 .field { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
-.field label { font-size: 13px; font-weight: 600; }
-.field .hint { font-size: 12px; color: var(--muted); }
+.field label, .field .flabel { font-size: 0.82rem; font-weight: 600; }
+.field .hint { font-size: 0.75rem; color: var(--muted); }
 input, select {
-  font: inherit; font-size: 16px; color: var(--ink); background: var(--bg);
+  font: inherit; font-size: max(16px, 1rem); color: var(--ink); background: var(--bg);
   border: 1px solid var(--line); border-radius: 10px; padding: 11px 12px; width: 100%; min-width: 0;
 }
+input.huge { font-family: var(--font-num); font-size: 2rem; font-weight: 700; padding: 10px 14px; }
 input:focus-visible, select:focus-visible, button:focus-visible { outline: 3px solid var(--mark); outline-offset: 1px; }
 button { font: inherit; cursor: pointer; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); padding: 11px 14px; font-weight: 700; }
-button.primary { background: var(--sign); color: var(--sign-ink); border-color: var(--sign); font-size: 16px; padding: 13px 16px; }
+button.primary { background: var(--sign); color: var(--sign-ink); border-color: var(--sign); font-size: 1rem; padding: 13px 16px; }
 button.ghost { background: transparent; }
 button.danger { color: var(--bad); border-color: var(--bad); background: transparent; }
-button.x { padding: 4px 9px; font-size: 16px; line-height: 1; color: var(--muted); background: transparent; }
-.seg { display: grid; grid-template-columns: 1fr 1fr; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 4px; gap: 4px; }
-.seg button { border: 0; background: transparent; color: var(--muted); }
+button.small { padding: 7px 12px; font-size: 0.85rem; }
+button.x { padding: 4px 9px; font-size: 1rem; line-height: 1; color: var(--muted); background: transparent; }
+.seg { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 4px; gap: 4px; }
+.seg button { border: 0; background: transparent; color: var(--muted); padding: 10px 6px; }
 .seg button[aria-pressed="true"] { background: var(--sign); color: var(--sign-ink); }
-.preview { font-size: 13px; color: var(--muted); }
-.preview b { color: var(--ink); }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chips button { border-radius: 999px; padding: 8px 14px; }
+.chips button[aria-pressed="true"] { background: var(--sign); color: var(--sign-ink); border-color: var(--sign); }
+
+/* Várias linhas de gasto */
+.xlines { display: flex; flex-direction: column; gap: 10px; }
+.xline { border: 1px solid var(--line); border-radius: 10px; padding: 10px; display: flex; flex-direction: column; gap: 8px; background: var(--bg); }
+.xline-top { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) auto; gap: 8px; align-items: end; }
+.xline input, .xline select { background: var(--surface); }
+.xline .fuel { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.xline .fuel[hidden] { display: none; }
+.xtotal { display: flex; justify-content: space-between; align-items: baseline; font-weight: 800; font-size: 1.05rem; border-top: 2px solid var(--ink); padding-top: 10px; }
 
 /* Calculadora */
 .verdict { border-radius: 10px; padding: 14px; display: flex; flex-direction: column; gap: 4px; border: 2px solid currentColor; }
-.verdict strong { font-family: var(--font-display); font-weight: 900; font-size: 22px; }
+.verdict strong { font-family: var(--font-display); font-weight: 900; font-size: 1.4rem; }
 .verdict.good { color: var(--good); } .verdict.warn { color: var(--warn); } .verdict.bad { color: var(--bad); } .verdict.idle { color: var(--muted); border-style: dashed; }
-.verdict p { margin: 0; color: var(--ink); font-size: 14px; }
-.kv { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 16px; }
-.kv div { display: flex; flex-direction: column; }
-.kv .num { font-size: 16px; font-weight: 700; }
+.verdict p { color: var(--ink); font-size: 0.88rem; }
+.kv { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 16px; }
+.kv div { display: flex; flex-direction: column; min-width: 0; }
+.kv .num { font-size: 1rem; font-weight: 700; }
+
+/* Relatório */
+.month-nav { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.month-nav h2 { text-transform: capitalize; }
+.rep-hero { display: flex; flex-direction: column; gap: 4px; }
+.rep-hero .big { font-size: 2.2rem; }
+.apps { display: flex; flex-direction: column; gap: 10px; }
+.app-row { display: grid; grid-template-columns: 5.5rem minmax(0, 1fr) auto; gap: 10px; align-items: center; }
+.app-row .bar { height: 10px; border-radius: 3px; background: var(--sign); }
+.app-row .track { background: var(--bg); border-radius: 3px; overflow: hidden; }
+.app-row .meta { font-size: 0.75rem; color: var(--muted); grid-column: 2 / -1; margin-top: -6px; }
+.table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+.table td { padding: 8px 0; border-top: 1px solid var(--line); }
+.table tr:first-child td { border-top: 0; }
+.table td:last-child { text-align: right; font-family: var(--font-num); font-variant-numeric: tabular-nums; font-weight: 700; }
+.table tr.total td { border-top: 2px solid var(--ink); font-weight: 800; }
+
+/* Ajustes */
+.switch-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.callout { border: 1px solid var(--line); background: var(--bg); border-radius: 10px; padding: 12px; display: flex; flex-direction: column; gap: 8px; font-size: 0.88rem; }
+
+/* Folha inferior (corrida rápida, jornada) */
+.backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 20; }
+.sheet {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 21;
+  background: var(--surface); border-radius: 18px 18px 0 0; border-top: 1px solid var(--line);
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-top: 18px; padding-bottom: calc(18px + env(safe-area-inset-bottom, 0px));
+  max-height: 90vh; overflow-y: auto;
+}
+.sheet form { max-width: 560px; margin: 0 auto; }
 
 /* Navegação */
 nav.tabs {
   position: fixed; left: 0; right: 0; bottom: 0; z-index: 5;
   background: var(--surface); border-top: 1px solid var(--line);
-  padding-left: max(8px, env(safe-area-inset-left, 0px)); padding-right: max(8px, env(safe-area-inset-right, 0px));
+  padding-left: max(6px, env(safe-area-inset-left, 0px)); padding-right: max(6px, env(safe-area-inset-right, 0px));
   padding-top: 6px; padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px));
 }
-nav.tabs .in { max-width: 560px; margin: 0 auto; display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; }
-nav.tabs button { border: 0; background: transparent; color: var(--muted); display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 6px 4px; font-size: 12px; font-weight: 600; }
+nav.tabs .in { max-width: 560px; margin: 0 auto; display: grid; grid-template-columns: repeat(5, 1fr); gap: 2px; }
+nav.tabs button { border: 0; background: transparent; color: var(--muted); display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 6px 2px; font-size: 0.72rem; font-weight: 600; }
 nav.tabs button svg { width: 22px; height: 22px; }
 nav.tabs button[aria-current="page"] { color: var(--sign); }
-:root:not([data-theme="light"]) nav.tabs button[aria-current="page"] { color: var(--ink); }
-:root[data-theme="light"] nav.tabs button[aria-current="page"] { color: var(--sign); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) nav.tabs button[aria-current="page"] { color: var(--mark); } }
+:root[data-theme="dark"] nav.tabs button[aria-current="page"] { color: var(--mark); }
 
-.toast { position: fixed; left: 50%; bottom: calc(84px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%) translateY(20px);
-  background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 999px; font-weight: 700; font-size: 14px; opacity: 0; transition: .25s; pointer-events: none; z-index: 6; }
+.toast { position: fixed; left: 50%; bottom: calc(88px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%) translateY(20px);
+  background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 999px; font-weight: 700; font-size: 0.88rem; opacity: 0; transition: .25s; pointer-events: none; z-index: 30; max-width: calc(100% - 32px); text-align: center; }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
@@ -181,11 +248,17 @@ nav.tabs button[aria-current="page"] { color: var(--sign); }
 
   <div class="sample" id="sample-banner" hidden>
     <span>Você está vendo <b>dados de exemplo</b>.</span>
-    <button class="ghost" id="btn-clear-sample" type="button">Começar do zero</button>
+    <button class="ghost small" id="btn-clear-sample" type="button">Começar do zero</button>
   </div>
 
   <!-- HOJE -->
   <section data-tab="hoje">
+    <div class="shift" id="shift">
+      <span class="dot" aria-hidden="true"></span>
+      <div class="txt"><b id="shift-title">Jornada parada</b><span class="muted" id="shift-sub">Inicie para contar as horas sozinho</span></div>
+      <button type="button" class="small" id="btn-shift">Iniciar dia</button>
+    </div>
+
     <div class="sign" aria-live="polite">
       <div class="sign-in">
         <div class="sign-row">
@@ -195,10 +268,15 @@ nav.tabs button[aria-current="page"] { color: var(--sign); }
           </div>
           <div class="meta-of">meta <span class="num" id="h-meta">R$ 0</span></div>
         </div>
-        <div class="road" role="progressbar" aria-label="Progresso da meta" aria-valuemin="0" aria-valuemax="100" id="h-road"><div class="road-fill" id="h-fill"></div></div>
+        <div class="road" role="progressbar" aria-label="Progresso da meta do dia" aria-valuemin="0" aria-valuemax="100" id="h-road"><div class="road-fill" id="h-fill"></div></div>
         <div class="need" id="h-need"></div>
       </div>
     </div>
+
+    <button type="button" class="primary add-ride" id="btn-ride">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+      Corrida
+    </button>
 
     <div class="grid">
       <div class="tile"><span class="label">Bruto</span><span class="num" id="t-bruto"></span></div>
@@ -210,9 +288,23 @@ nav.tabs button[aria-current="page"] { color: var(--sign); }
     </div>
 
     <div class="card">
+      <h2>Metas</h2>
+      <div class="goal">
+        <div class="goal-head"><b>Semana</b><span class="num" id="g-sem"></span></div>
+        <div class="road thin" role="progressbar" aria-label="Progresso da meta da semana" aria-valuemin="0" aria-valuemax="100" id="g-sem-road"><div class="road-fill" id="g-sem-fill"></div></div>
+        <span class="muted" id="g-sem-sub"></span>
+      </div>
+      <div class="goal">
+        <div class="goal-head"><b>Mês</b><span class="num" id="g-mes"></span></div>
+        <div class="road thin" role="progressbar" aria-label="Progresso da meta do mês" aria-valuemin="0" aria-valuemax="100" id="g-mes-road"><div class="road-fill" id="g-mes-fill"></div></div>
+        <span class="muted" id="g-mes-sub"></span>
+      </div>
+    </div>
+
+    <div class="card">
       <h2>Últimos 7 dias</h2>
       <div class="week" id="week"></div>
-      <div class="preview" id="week-sum"></div>
+      <div class="muted" id="week-sum"></div>
     </div>
 
     <div class="card">
@@ -224,15 +316,15 @@ nav.tabs button[aria-current="page"] { color: var(--sign); }
   <!-- LANÇAR -->
   <section data-tab="lancar" hidden>
     <div class="seg" role="group" aria-label="Tipo de lançamento">
-      <button type="button" id="seg-ganho" aria-pressed="true">+ Ganho</button>
-      <button type="button" id="seg-gasto" aria-pressed="false">− Gasto</button>
+      <button type="button" data-seg="ganho" aria-pressed="true">Ganhos</button>
+      <button type="button" data-seg="gasto" aria-pressed="false">Gastos</button>
     </div>
 
-    <form class="card" id="f-ganho" autocomplete="off">
-      <h2>Registrar ganho</h2>
+    <form class="card" id="f-ganho" data-form="ganho" autocomplete="off">
+      <h2>Ganhos de um período</h2>
+      <p class="muted">Use para lançar o resumo do app de uma vez. Para cada corrida, use o botão <b>+ Corrida</b> na tela Hoje.</p>
       <div class="row">
-        <div class="field"><label for="g-app">App</label>
-          <select id="g-app"><option>Uber</option><option>99</option><option>inDrive</option><option>Particular</option><option>Outro</option></select></div>
+        <div class="field"><label for="g-app">App</label><select id="g-app"></select></div>
         <div class="field"><label for="g-data">Dia</label><input id="g-data" type="date"></div>
       </div>
       <div class="row">
@@ -240,27 +332,30 @@ nav.tabs button[aria-current="page"] { color: var(--sign); }
         <div class="field"><label for="g-corridas">Nº de corridas</label><input id="g-corridas" inputmode="numeric" placeholder="5"></div>
       </div>
       <div class="row">
-        <div class="field"><label for="g-km">Km rodados</label><input id="g-km" inputmode="decimal" placeholder="38"><span class="hint">Inclui km até o passageiro</span></div>
-        <div class="field"><label for="g-horas">Horas online</label><input id="g-horas" inputmode="decimal" placeholder="2,5"></div>
+        <div class="field"><label for="g-km">Km rodados</label><input id="g-km" inputmode="decimal" placeholder="38"></div>
+        <div class="field"><label for="g-horas">Horas online</label><input id="g-horas" inputmode="decimal" placeholder="2,5"><span class="hint">Deixe vazio se usou a jornada</span></div>
       </div>
-      <div class="preview" id="g-preview"></div>
-      <button class="primary" type="submit">Salvar ganho</button>
+      <div class="muted" id="g-preview"></div>
+      <button class="primary" type="submit">Salvar ganhos</button>
     </form>
 
-    <form class="card" id="f-gasto" autocomplete="off" hidden>
-      <h2>Registrar gasto</h2>
-      <p class="preview" style="margin:0">O combustível já é calculado pelos km rodados. Aqui entram os outros gastos.</p>
-      <div class="row">
-        <div class="field"><label for="x-cat">Categoria</label>
-          <select id="x-cat"><option>Alimentação</option><option>Lavagem</option><option>Pedágio</option><option>Estacionamento</option><option>Manutenção</option><option>Aluguel do carro</option><option>Outros</option></select></div>
-        <div class="field"><label for="x-data">Dia</label><input id="x-data" type="date"></div>
+    <form class="card" id="f-gasto" data-form="gasto" autocomplete="off" hidden>
+      <h2>Gastos do dia</h2>
+      <p class="muted">Lance quantos gastos quiser de uma vez: gasolina, lavagem, almoço…</p>
+      <div class="field"><label for="x-data">Dia</label><input id="x-data" type="date"></div>
+      <div class="field"><span class="flabel">Adicionar rápido</span>
+        <div class="chips" id="x-quick"></div>
       </div>
-      <div class="row">
-        <div class="field"><label for="x-valor">Valor (R$)</label><input id="x-valor" inputmode="decimal" placeholder="18,00" required></div>
-        <div class="field"><label for="x-nota">Observação</label><input id="x-nota" placeholder="opcional"></div>
-      </div>
-      <button class="primary" type="submit">Salvar gasto</button>
+      <div class="xlines" id="x-lines"></div>
+      <button type="button" id="x-add">+ Adicionar outro gasto</button>
+      <div class="xtotal"><span>Total</span><span class="num" id="x-total">R$ 0,00</span></div>
+      <button class="primary" type="submit" id="x-save">Salvar gastos</button>
     </form>
+
+    <div class="card">
+      <h2>Abastecimentos recentes</h2>
+      <ul class="list" id="abast-list"></ul>
+    </div>
   </section>
 
   <!-- CALCULAR -->
@@ -280,32 +375,106 @@ nav.tabs button[aria-current="page"] { color: var(--sign); }
     </div>
 
     <div class="card">
+      <h2>Etanol ou gasolina?</h2>
+      <p class="muted">Para carro flex. Pela regra dos 70%: se o etanol custar até 70% do preço da gasolina, ele compensa.</p>
+      <div class="row">
+        <div class="field"><label for="f-eta">Etanol (R$/L)</label><input id="f-eta" inputmode="decimal"></div>
+        <div class="field"><label for="f-gas">Gasolina (R$/L)</label><input id="f-gas" inputmode="decimal"></div>
+      </div>
+      <div class="verdict idle" id="f-verdict"></div>
+    </div>
+
+    <div class="card">
       <h2>Quanto preciso rodar para ganhar…</h2>
       <div class="field"><label for="a-alvo">Lucro líquido desejado (R$)</label><input id="a-alvo" inputmode="decimal" placeholder="250"></div>
       <div class="kv" id="a-kv"></div>
-      <div class="preview" id="a-base"></div>
+      <div class="muted" id="a-base"></div>
+    </div>
+  </section>
+
+  <!-- RELATÓRIO -->
+  <section data-tab="relatorio" hidden>
+    <div class="month-nav">
+      <button type="button" class="small" id="m-prev" aria-label="Mês anterior">‹</button>
+      <h2 id="m-title"></h2>
+      <button type="button" class="small" id="m-next" aria-label="Próximo mês">›</button>
+    </div>
+
+    <div class="sign"><div class="sign-in">
+      <div class="rep-hero">
+        <span class="label">Lucro líquido do mês</span>
+        <span class="big" id="r-lucro"></span>
+        <span id="r-meta-txt"></span>
+      </div>
+      <div class="road" role="progressbar" aria-label="Progresso da meta do mês" aria-valuemin="0" aria-valuemax="100" id="r-road"><div class="road-fill" id="r-fill"></div></div>
+    </div></div>
+
+    <div class="grid" id="r-tiles"></div>
+
+    <div class="card">
+      <h2>Qual app rendeu mais</h2>
+      <div class="apps" id="r-apps"></div>
+    </div>
+
+    <div class="card">
+      <h2>Para onde foi o dinheiro</h2>
+      <table class="table" id="r-table"></table>
+    </div>
+
+    <div class="card">
+      <h2>Combustível</h2>
+      <div class="kv" id="r-fuel"></div>
     </div>
   </section>
 
   <!-- AJUSTES -->
   <section data-tab="ajustes" hidden>
     <form class="card" id="f-ajustes">
-      <h2>Seu carro e sua meta</h2>
-      <div class="row">
-        <div class="field"><label for="s-meta">Meta de lucro por dia (R$)</label><input id="s-meta" inputmode="decimal"></div>
-        <div class="field"><label for="s-min">Mínimo por km (R$)</label><input id="s-min" inputmode="decimal"><span class="hint">Abaixo disso, recusar</span></div>
+      <h2>Metas</h2>
+      <div class="row3">
+        <div class="field"><label for="s-meta">Por dia (R$)</label><input id="s-meta" inputmode="decimal"></div>
+        <div class="field"><label for="s-metasem">Por semana (R$)</label><input id="s-metasem" inputmode="decimal"></div>
+        <div class="field"><label for="s-metames">Por mês (R$)</label><input id="s-metames" inputmode="decimal"></div>
       </div>
-      <div class="row">
-        <div class="field"><label for="s-kml">Consumo (km por litro)</label><input id="s-kml" inputmode="decimal"></div>
-        <div class="field"><label for="s-preco">Preço do litro (R$)</label><input id="s-preco" inputmode="decimal"></div>
+      <h2>Seu carro</h2>
+      <div class="field"><label for="s-tipo">Combustível que você usa</label><select id="s-tipo"></select><span class="hint" id="s-tipo-hint"></span></div>
+      <div class="row3">
+        <div class="field"><label for="s-kml" id="s-kml-l">Consumo (km/l)</label><input id="s-kml" inputmode="decimal"></div>
+        <div class="field"><label for="s-preco" id="s-preco-l">Preço do litro (R$)</label><input id="s-preco" inputmode="decimal"></div>
+        <div class="field"><label for="s-min">Mínimo por km</label><input id="s-min" inputmode="decimal"></div>
       </div>
-      <div class="preview" id="s-preview"></div>
+      <div class="muted" id="s-preview"></div>
+      <div class="field"><span class="flabel">Como contar o combustível no lucro</span>
+        <div class="seg" role="group" aria-label="Como contar o combustível" id="comb-seg">
+          <button type="button" data-comb-opt="abast" aria-pressed="true">O que paguei no posto</button>
+          <button type="button" data-comb-opt="km" aria-pressed="false">Pelos km rodados</button>
+        </div>
+        <span class="hint" id="comb-hint"></span>
+      </div>
+      <div class="callout" id="s-real" hidden></div>
       <button class="primary" type="submit">Salvar ajustes</button>
     </form>
 
     <div class="card">
+      <h2>Aparência</h2>
+      <div class="field"><span class="flabel">Tema</span>
+        <div class="seg" role="group" aria-label="Tema" id="theme-seg">
+          <button type="button" data-theme-opt="auto" aria-pressed="true">Automático</button>
+          <button type="button" data-theme-opt="light" aria-pressed="false">Claro</button>
+          <button type="button" data-theme-opt="dark" aria-pressed="false">Escuro</button>
+        </div>
+      </div>
+      <div class="field"><span class="flabel">Tamanho da letra</span>
+        <div class="seg" role="group" aria-label="Tamanho da letra" id="size-seg">
+          <button type="button" data-size-opt="normal" aria-pressed="true">Normal</button>
+          <button type="button" data-size-opt="big" aria-pressed="false">Grande</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
       <h2>Dados</h2>
-      <p class="preview" style="margin:0">Neste protótipo os dados ficam salvos só neste aparelho.</p>
+      <p class="muted">Neste protótipo os dados ficam salvos só neste aparelho.</p>
       <div class="row">
         <button type="button" id="btn-sample">Carregar exemplo</button>
         <button type="button" class="danger" id="btn-wipe">Apagar tudo</button>
@@ -323,15 +492,40 @@ nav.tabs button[aria-current="page"] { color: var(--sign); }
     <button type="button" data-go="hoje" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16M7 16V10M12 16V6M17 16v-4"/></svg>Hoje</button>
     <button type="button" data-go="lancar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>Lançar</button>
     <button type="button" data-go="calcular"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 12h2M14 12h2M8 16h2M14 16h2"/></svg>Calcular</button>
+    <button type="button" data-go="relatorio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 17v-3M12 17v-6M15 17v-4"/></svg>Relatório</button>
     <button type="button" data-go="ajustes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1"/></svg>Ajustes</button>
   </div>
 </nav>
+
+<div class="backdrop" id="backdrop" hidden></div>
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title" hidden>
+  <form id="sheet-form" autocomplete="off">
+    <h2 id="sheet-title"></h2>
+    <div id="sheet-body" style="display:flex;flex-direction:column;gap:12px"></div>
+    <div class="row">
+      <button type="button" id="sheet-cancel">Cancelar</button>
+      <button type="submit" class="primary" id="sheet-ok">Salvar</button>
+    </div>
+  </form>
+</div>
 <div class="toast" id="toast" role="status"></div>
 
 <script>
 (function () {
   const KEY = 'rodalucro:v1';
-  const DEFAULTS = { meta: 300, kml: 11, preco: 6.29, min: 1.8 };
+  // preços médios de referência nos postos (R$ por litro; GNV por m³)
+  const COMBS = {
+    gasolina: { nome: 'Gasolina comum', preco: 6.36, faixa: 'de R$ 5,49 a R$ 6,79', un: 'L', kml: 11 },
+    aditivada: { nome: 'Gasolina aditivada', preco: 6.79, faixa: '', un: 'L', kml: 11 },
+    etanol: { nome: 'Etanol', preco: 4.54, faixa: 'de R$ 4,20 a R$ 4,89; perto de R$ 3,25 nos postos mais baratos', un: 'L', kml: 7.7 },
+    s500: { nome: 'Diesel comum (S500)', preco: 6.89, faixa: 'de R$ 6,80 a R$ 6,99', un: 'L', kml: 12 },
+    s10: { nome: 'Diesel S10', preco: 6.80, faixa: 'de R$ 6,71 a R$ 6,89', un: 'L', kml: 12 },
+    gnv: { nome: 'GNV', preco: 4.30, faixa: 'de R$ 3,89 a R$ 4,74', un: 'm³', kml: 13 },
+  };
+  const DEFAULTS = { meta: 300, metaSemana: 1500, metaMes: 6000, min: 1.8, kml: 11, preco: 6.36, combTipo: 'gasolina', tema: 'auto', letra: 'normal', ultimoApp: 'Uber', modoComb: 'abast' };
+  const APPS = ['Uber', '99', 'inDrive', 'Particular', 'Outro'];
+  const FUEL = 'Combustível';
+  const CATS = [FUEL, 'Alimentação', 'Lavagem', 'Pedágio', 'Estacionamento', 'Manutenção', 'Aluguel do carro', 'Celular / internet', 'Outros'];
   const $ = (id) => document.getElementById(id);
 
   // ---------- utilidades ----------
@@ -343,137 +537,290 @@ nav.tabs button[aria-current="page"] { color: var(--sign); }
     let s = String(v).trim().replace(/[R$\s]/g, '');
     if (!s) return NaN;
     if (s.includes(',')) s = s.replace(/\./g, '').replace(',', '.');
+    else if (/^\d{1,3}(\.\d{3})+$/.test(s)) s = s.replace(/\./g, ''); // 84.520 (milhar)
     return parseFloat(s);
   }
   function dayKey(d) {
     const x = d || new Date();
     return x.getFullYear() + '-' + String(x.getMonth() + 1).padStart(2, '0') + '-' + String(x.getDate()).padStart(2, '0');
   }
-  function addDays(n) { const d = new Date(); d.setDate(d.getDate() + n); return d; }
+  function addDays(n, base) { const d = base ? new Date(base) : new Date(); d.setDate(d.getDate() + n); return d; }
   function hm(h) {
     if (!Number.isFinite(h) || h <= 0) return '0min';
     let H = Math.floor(h), M = Math.round((h - H) * 60);
     if (M === 60) { H++; M = 0; }
     return H ? H + 'h' + (M ? String(M).padStart(2, '0') : '') : M + 'min';
   }
+  const clock = (ts) => new Date(ts).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
   const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+  const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const pct = (v, total) => (total > 0 ? Math.max(0, Math.min(100, (v / total) * 100)) : 0);
 
   // ---------- estado ----------
   let state;
-  function load() {
-    try { const raw = localStorage.getItem(KEY); if (raw) return JSON.parse(raw); } catch (e) {}
-    return null;
-  }
+  function load() { try { const raw = localStorage.getItem(KEY); if (raw) return JSON.parse(raw); } catch (e) {} return null; }
   function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }
   const custoKm = () => state.settings.preco / state.settings.kml;
 
   function sampleState() {
-    const s = { ...DEFAULTS };
-    const ck = s.preco / s.kml;
+    // gerador com semente fixa para o exemplo sair sempre igual
+    let seed = 7;
+    const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+    const between = (a, b) => a + rnd() * (b - a);
     const e = [];
-    const g = (off, app, valor, corridas, km, horas) => e.push({ id: uid(), date: dayKey(addDays(off)), type: 'ganho', app, valor, corridas, km, horas, comb: +(km * ck).toFixed(2) });
-    const x = (off, cat, valor, nota) => e.push({ id: uid(), date: dayKey(addDays(off)), type: 'gasto', cat, valor, nota: nota || '' });
-    // hoje
-    g(0, 'Uber', 92.4, 5, 38, 2); g(0, '99', 41.8, 2, 17, 0.8); x(0, 'Alimentação', 18, 'almoço');
-    // dias anteriores
-    const past = [[-1, 268, 15, 112, 7.5, 22], [-2, 312, 17, 128, 8.2, 25], [-3, 198, 11, 86, 6, 0], [-4, 355, 19, 140, 9, 30], [-5, 241, 13, 98, 6.8, 15], [-6, 120, 7, 52, 3.5, 0]];
-    past.forEach(([o, v, c, k, h, food]) => { g(o, 'Uber', +(v * 0.7).toFixed(2), Math.round(c * 0.7), Math.round(k * 0.7), +(h * 0.7).toFixed(1)); g(o, '99', +(v * 0.3).toFixed(2), c - Math.round(c * 0.7), k - Math.round(k * 0.7), +(h * 0.3).toFixed(1)); if (food) x(o, 'Alimentação', food); });
-    x(-3, 'Lavagem', 35);
-    return { settings: s, entries: e, sample: true };
+    const realKml = 10.6;
+    let odo = 84200;
+    const day = (off) => dayKey(addDays(off));
+    e.push({ id: uid(), date: day(-30), type: 'abast', valor: 228.9, litros: 36.4, odo });
+    for (let off = -29; off <= -1; off++) {
+      const d = addDays(off);
+      if (d.getDay() === 0 && rnd() < 0.7) continue; // folga em boa parte dos domingos
+      if (rnd() < 0.08) continue;
+      const horas = +between(6, 10).toFixed(1);
+      const corridas = Math.round(horas * between(1.6, 2.2));
+      const ticket = between(15.5, 21.5);
+      const kmCorr = Math.round(corridas * between(6.5, 8.5));
+      const kmDia = Math.round(kmCorr * between(1.18, 1.32));
+      const start = new Date(d); start.setHours(6 + Math.floor(rnd() * 3), Math.floor(rnd() * 60), 0, 0);
+      e.push({ id: uid(), date: day(off), type: 'jornada', start: +start, end: +start + horas * 3.6e6, horas, km: kmDia });
+      const shares = [['Uber', 0.6], ['99', 0.3], ['inDrive', 0.1]];
+      let left = corridas, leftKm = kmCorr;
+      shares.forEach(([app, sh], i) => {
+        const c = i === shares.length - 1 ? left : Math.round(corridas * sh);
+        const k = i === shares.length - 1 ? leftKm : Math.round(kmCorr * sh);
+        left -= c; leftKm -= k;
+        if (c > 0) e.push({ id: uid(), date: day(off), type: 'ganho', app, valor: +(c * ticket * between(0.9, 1.1)).toFixed(2), corridas: c, km: k, horas: 0 });
+      });
+      if (rnd() < 0.85) e.push({ id: uid(), date: day(off), type: 'gasto', cat: 'Alimentação', valor: Math.round(between(15, 32)), nota: '' });
+      if (d.getDay() === 6) e.push({ id: uid(), date: day(off), type: 'gasto', cat: 'Lavagem', valor: 35, nota: '' });
+      // abastece de manhã o que vai rodar no dia
+      const litros = +(kmDia / (realKml * between(0.96, 1.04))).toFixed(1);
+      e.push({ id: uid(), date: day(off), type: 'abast', valor: +(litros * between(6.15, 6.39)).toFixed(2), litros, odo });
+      odo += kmDia;
+    }
+    e.push({ id: uid(), date: day(-12), type: 'gasto', cat: 'Manutenção', valor: 180, nota: 'troca de óleo' });
+    // hoje: jornada em andamento e corridas uma a uma
+    const t0 = Date.now() - 3.2 * 3.6e6;
+    const hoje = [[18.4, 'Uber', 7], [12.9, '99', 5], [24.7, 'Uber', 11], [15.2, 'Uber', 6], [21.3, 'inDrive', 9], [16.8, '99', 7]];
+    hoje.forEach(([v, app, km]) => e.push({ id: uid(), date: dayKey(), type: 'ganho', app, valor: v, corridas: 1, km, horas: 0 }));
+    e.push({ id: uid(), date: dayKey(), type: 'abast', valor: 100, litros: 15.9, odo });
+    e.push({ id: uid(), date: dayKey(), type: 'gasto', cat: 'Alimentação', valor: 14, nota: 'café' });
+    return { settings: { ...DEFAULTS }, entries: e, shift: { start: t0, odo }, sample: true };
   }
 
   // ---------- cálculos ----------
+  let IDX = {};
+  function reindex() { IDX = {}; state.entries.forEach((e) => (IDX[e.date] || (IDX[e.date] = [])).push(e)); }
   function dayStats(key) {
-    const list = state.entries.filter((e) => e.date === key);
-    const t = { bruto: 0, comb: 0, gastos: 0, corridas: 0, km: 0, horas: 0, list };
-    list.forEach((e) => {
-      if (e.type === 'ganho') { t.bruto += e.valor; t.comb += e.comb || 0; t.corridas += e.corridas || 0; t.km += e.km || 0; t.horas += e.horas || 0; }
-      else t.gastos += e.valor;
-    });
+    const list = IDX[key] || [];
+    const t = { key, list, bruto: 0, corridas: 0, kmC: 0, kmJ: 0, horas: 0, gastos: 0, apps: {}, cats: {}, abast: 0, litros: 0 };
+    for (const e of list) {
+      if (e.type === 'ganho') {
+        t.bruto += e.valor; t.corridas += e.corridas || 0; t.kmC += e.km || 0; t.horas += e.horas || 0;
+        const a = t.apps[e.app] || (t.apps[e.app] = { bruto: 0, corridas: 0 }); a.bruto += e.valor; a.corridas += e.corridas || 0;
+      } else if (e.type === 'gasto') { t.gastos += e.valor; t.cats[e.cat] = (t.cats[e.cat] || 0) + e.valor; }
+      else if (e.type === 'jornada') { t.horas += e.horas || 0; t.kmJ += e.km || 0; }
+      else if (e.type === 'abast') { t.abast += e.valor; t.litros += e.litros || 0; }
+    }
+    if (key === dayKey() && state.shift) t.horas += (Date.now() - state.shift.start) / 3.6e6;
+    t.km = Math.max(t.kmC, t.kmJ); // km do painel (jornada) inclui os km vazios
+    // combustível: o que foi pago no posto no dia, ou estimativa pelos km rodados
+    t.comb = state.settings.modoComb === 'km' ? t.km * custoKm() : t.abast;
     t.lucro = t.bruto - t.comb - t.gastos;
+    t.worked = t.bruto > 0;
     return t;
   }
-  // médias usando todo o histórico (com valores padrão quando não há dados)
+  function sumStats(keys) {
+    const s = { bruto: 0, corridas: 0, km: 0, horas: 0, gastos: 0, comb: 0, lucro: 0, abast: 0, litros: 0, dias: 0, apps: {}, cats: {}, best: null, days: [] };
+    keys.forEach((k) => {
+      const t = dayStats(k); s.days.push(t);
+      ['bruto', 'corridas', 'km', 'horas', 'gastos', 'comb', 'lucro', 'abast', 'litros'].forEach((f) => (s[f] += t[f]));
+      if (t.worked) { s.dias++; if (!s.best || t.lucro > s.best.lucro) s.best = t; }
+      Object.entries(t.apps).forEach(([a, v]) => { const x = s.apps[a] || (s.apps[a] = { bruto: 0, corridas: 0 }); x.bruto += v.bruto; x.corridas += v.corridas; });
+      Object.entries(t.cats).forEach(([c, v]) => (s.cats[c] = (s.cats[c] || 0) + v));
+    });
+    return s;
+  }
+  // médias de todo o histórico (valores típicos quando ainda não há dados)
   function averages() {
-    let bruto = 0, corridas = 0, km = 0, horas = 0, cH = 0;
-    state.entries.forEach((e) => {
-      if (e.type !== 'ganho' || !e.corridas) return;
-      bruto += e.valor; corridas += e.corridas; km += e.km || 0;
-      if (e.horas) { horas += e.horas; cH += e.corridas; }
+    let bruto = 0, corridas = 0, km = 0, cKm = 0, horas = 0, cH = 0;
+    Object.keys(IDX).forEach((k) => {
+      const t = dayStats(k);
+      if (!t.corridas) return;
+      bruto += t.bruto; corridas += t.corridas;
+      if (t.km) { km += t.km; cKm += t.corridas; }
+      if (t.horas) { horas += t.horas; cH += t.corridas; }
     });
     const has = corridas >= 3;
     return {
       ticket: has ? bruto / corridas : 18,
-      kmCorrida: has && km ? km / corridas : 8,
+      kmCorrida: cKm >= 3 ? km / cKm : 8,
       horasCorrida: cH >= 3 ? horas / cH : 1 / 3,
       real: has, corridas,
     };
   }
+  // consumo medido pelos abastecimentos com km do painel (método tanque cheio)
+  function realKml() {
+    const list = state.entries.filter((e) => e.type === 'abast' && e.odo > 0 && e.litros > 0).sort((a, b) => a.odo - b.odo);
+    if (list.length < 2) return null;
+    const km = list[list.length - 1].odo - list[0].odo;
+    const litros = list.slice(1).reduce((s, e) => s + e.litros, 0);
+    return km > 0 && litros > 0 ? { kml: km / litros, n: list.length, km } : null;
+  }
+  function weekKeys() {
+    const today = new Date(); const dow = (today.getDay() + 6) % 7; // segunda = 0
+    const keys = []; for (let i = -dow; i <= 0; i++) keys.push(dayKey(addDays(i))); return keys;
+  }
+  function monthKeys(y, m, upToToday) {
+    const n = new Date(y, m + 1, 0).getDate(), keys = [], todayK = dayKey();
+    for (let d = 1; d <= n; d++) { const k = dayKey(new Date(y, m, d)); if (upToToday && k > todayK) break; keys.push(k); }
+    return keys;
+  }
+  function ridesNeeded(falta) {
+    const a = averages();
+    const lc = a.ticket - a.kmCorrida * custoKm();
+    if (falta <= 0) return { done: true };
+    if (lc <= 0) return { loss: true };
+    const n = Math.ceil(falta / lc);
+    return { n, horas: n * a.horasCorrida, lc };
+  }
+
+  // ---------- aparência ----------
+  let lookTouched = false;
+  function applyLook() {
+    const s = state.settings, root = document.documentElement;
+    if (s.tema === 'light' || s.tema === 'dark') { root.setAttribute('data-theme', s.tema); lookTouched = true; }
+    else if (lookTouched) root.removeAttribute('data-theme');
+    root.classList.toggle('big', s.letra === 'big');
+    document.querySelectorAll('[data-theme-opt]').forEach((b) => b.setAttribute('aria-pressed', b.dataset.themeOpt === s.tema));
+    document.querySelectorAll('[data-size-opt]').forEach((b) => b.setAttribute('aria-pressed', b.dataset.sizeOpt === s.letra));
+    document.querySelectorAll('[data-comb-opt]').forEach((b) => b.setAttribute('aria-pressed', b.dataset.combOpt === s.modoComb));
+    $('comb-hint').textContent = s.modoComb === 'km'
+      ? 'Estimativa: km rodados × custo por km. Bom para quem enche o tanque a cada vários dias.'
+      : 'Entra no lucro do dia o valor de combustível que você lançou em Gastos.';
+  }
 
   // ---------- render ----------
+  function setRoad(roadId, fillId, p) { $(fillId).style.width = p + '%'; $(roadId).setAttribute('aria-valuenow', Math.round(p)); }
+
+  function renderShift() {
+    const box = $('shift'), sh = state.shift;
+    box.classList.toggle('on', !!sh);
+    if (sh) {
+      $('shift-title').textContent = 'Jornada: ' + hm((Date.now() - sh.start) / 3.6e6);
+      $('shift-sub').textContent = 'Começou às ' + clock(sh.start) + (sh.odo ? ' · painel ' + dec(sh.odo, 0) + ' km' : '');
+      $('btn-shift').textContent = 'Encerrar dia';
+    } else {
+      const done = (IDX[dayKey()] || []).filter((e) => e.type === 'jornada');
+      $('shift-title').textContent = done.length ? 'Jornada encerrada' : 'Jornada parada';
+      $('shift-sub').textContent = done.length ? hm(done.reduce((s, e) => s + e.horas, 0)) + ' trabalhadas hoje' : 'Inicie para contar as horas sozinho';
+      $('btn-shift').textContent = done.length ? 'Voltar a rodar' : 'Iniciar dia';
+    }
+  }
+
   function renderHoje() {
     const s = state.settings;
     const t = dayStats(dayKey());
     $('h-lucro').textContent = brl(t.lucro);
     $('h-meta').textContent = brl0(s.meta);
-    const pct = s.meta > 0 ? Math.max(0, Math.min(100, (t.lucro / s.meta) * 100)) : 0;
-    $('h-fill').style.width = pct + '%';
-    $('h-road').setAttribute('aria-valuenow', Math.round(pct));
+    setRoad('h-road', 'h-fill', pct(t.lucro, s.meta));
 
-    const a = averages();
-    const lucroCorrida = a.ticket - a.kmCorrida * custoKm();
-    const falta = s.meta - t.lucro;
+    const r = ridesNeeded(s.meta - t.lucro);
     let need;
-    if (falta <= 0) need = 'Meta batida! 🎉<small>Você passou ' + brl(-falta) + ' da meta de hoje.</small>';
-    else if (lucroCorrida <= 0) need = 'Faltam ' + brl(falta) + '<small>Seu ganho médio por corrida não cobre o combustível. Revise o mínimo por km.</small>';
-    else {
-      const n = Math.ceil(falta / lucroCorrida);
-      need = 'Faltam ' + n + ' corrida' + (n > 1 ? 's' : '') + '<small>' + brl(falta) + ' · cerca de ' + hm(n * a.horasCorrida) + ' de trabalho · ' + brl(lucroCorrida) + ' de lucro por corrida</small>';
-    }
+    if (r.done) need = 'Meta batida! 🎉<small>Você passou ' + brl(t.lucro - s.meta) + ' da meta de hoje.</small>';
+    else if (r.loss) need = 'Faltam ' + brl(s.meta - t.lucro) + '<small>Seu ganho médio por corrida não cobre o combustível. Revise o mínimo por km.</small>';
+    else need = 'Faltam ' + r.n + ' corrida' + (r.n > 1 ? 's' : '') + '<small>' + brl(s.meta - t.lucro) + ' · cerca de ' + hm(r.horas) + ' de trabalho · ' + brl(r.lc) + ' de lucro por corrida</small>';
     $('h-need').innerHTML = need;
 
     $('t-bruto').textContent = brl(t.bruto);
     $('t-comb').textContent = brl(t.comb);
     $('t-gastos').textContent = brl(t.gastos);
-    $('t-corridas').textContent = t.corridas + (t.km ? ' · ' + dec(t.km, 0) + 'km' : '');
+    $('t-corridas').textContent = t.corridas + ' · ' + dec(t.km, 0) + ' km';
     $('t-km').textContent = t.km ? brl(t.lucro / t.km) : '—';
-    $('t-hora').textContent = t.horas ? brl(t.lucro / t.horas) : '—';
-    document.querySelectorAll('.tile').forEach((el) => el.classList.remove('neg'));
-    if (t.lucro < 0) { $('t-km').parentNode.classList.add('neg'); $('t-hora').parentNode.classList.add('neg'); }
+    $('t-hora').textContent = t.horas > 0.05 ? brl(t.lucro / t.horas) : '—';
+    $('t-km').parentNode.classList.toggle('neg', t.lucro < 0);
+    $('t-hora').parentNode.classList.toggle('neg', t.lucro < 0);
 
-    // semana
+    // metas da semana e do mês
+    const wk = sumStats(weekKeys());
+    $('g-sem').textContent = brl0(wk.lucro) + ' / ' + brl0(s.metaSemana);
+    setRoad('g-sem-road', 'g-sem-fill', pct(wk.lucro, s.metaSemana));
+    $('g-sem-sub').innerHTML = goalSub(s.metaSemana - wk.lucro, 7 - weekKeys().length + 1);
+    const now = new Date();
+    const mk = monthKeys(now.getFullYear(), now.getMonth(), true);
+    const mo = sumStats(mk);
+    $('g-mes').textContent = brl0(mo.lucro) + ' / ' + brl0(s.metaMes);
+    setRoad('g-mes-road', 'g-mes-fill', pct(mo.lucro, s.metaMes));
+    $('g-mes-sub').innerHTML = goalSub(s.metaMes - mo.lucro, new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate() - now.getDate() + 1);
+
+    // 7 dias
     const days = [];
     for (let i = -6; i <= 0; i++) { const d = addDays(i); days.push({ d, t: dayStats(dayKey(d)), today: i === 0 }); }
-    const max = Math.max(s.meta, ...days.map((x) => x.t.lucro), 1);
-    const H = 100; // altura útil das barras (px) dentro de 140
-    const wk = $('week');
-    wk.innerHTML = days.map((x) => {
+    const max = Math.max(s.meta, ...days.map((x) => Math.abs(x.t.lucro)), 1);
+    const H = 100;
+    $('week').innerHTML = days.map((x) => {
       const v = x.t.lucro, h = Math.max(2, (Math.abs(v) / max) * H);
       const lab = x.d.toLocaleDateString('pt-BR', { weekday: 'short' }).replace('.', '');
-      return '<div class="bar-wrap"><span class="v num">' + (v ? Math.round(v) : '') + '</span><div class="bar' + (x.today ? ' today' : '') + (v < 0 ? ' neg' : '') + '" style="height:' + h + 'px" title="' + brl(v) + '"></div><span class="d">' + (x.today ? 'hoje' : lab) + '</span></div>';
-    }).join('') + '<div class="metaline" style="bottom:' + (18 + (s.meta / max) * H) + 'px"><span>meta</span></div>';
+      return '<div class="bar-wrap"><span class="v num">' + (Math.round(v) || '') + '</span><div class="bar' + (x.today ? ' today' : '') + (v < 0 ? ' neg' : '') + '" style="height:' + h + 'px" title="' + brl(v) + '"></div><span class="d">' + (x.today ? 'hoje' : lab) + '</span></div>';
+    }).join('') + '<div class="metaline" style="bottom:' + (19 + (s.meta / max) * H) + 'px"><span>meta</span></div>';
     const tot = days.reduce((acc, x) => acc + x.t.lucro, 0);
     const hit = days.filter((x) => x.t.lucro >= s.meta).length;
-    $('week-sum').innerHTML = 'Lucro na semana: <b>' + brl(tot) + '</b> · meta batida em <b>' + hit + '</b> de 7 dias';
+    $('week-sum').innerHTML = 'Lucro em 7 dias: <b>' + brl(tot) + '</b> · meta do dia batida em <b>' + hit + '</b> de 7';
 
-    // lista
+    // lista do dia
     const ul = $('today-list');
-    if (!t.list.length) { ul.innerHTML = '<li class="empty">Nenhum lançamento hoje. Toque em <b>Lançar</b> para registrar o primeiro ganho.</li>'; return; }
-    ul.innerHTML = t.list.slice().reverse().map((e) => {
-      if (e.type === 'ganho') {
-        const d = [e.corridas ? e.corridas + ' corr.' : '', e.km ? dec(e.km, 0) + ' km' : '', e.horas ? hm(e.horas) : '', e.comb ? '−' + brl(e.comb) + ' comb.' : ''].filter(Boolean).join(' · ');
-        return '<li><span class="chip in">' + esc(e.app) + '</span><span class="desc">' + d + '</span><span class="amt num">' + brl(e.valor) + '</span><button class="x" data-del="' + e.id + '" aria-label="Apagar">×</button></li>';
-      }
-      return '<li><span class="chip out">' + esc(e.cat) + '</span><span class="desc">' + esc(e.nota || '') + '</span><span class="amt num">−' + brl(e.valor) + '</span><button class="x" data-del="' + e.id + '" aria-label="Apagar">×</button></li>';
-    }).join('');
+    if (!t.list.length) { ul.innerHTML = '<li class="empty">Nada lançado hoje. Toque em <b>+ Corrida</b> ao terminar cada corrida.</li>'; return; }
+    ul.innerHTML = t.list.slice().reverse().map(itemHtml).join('');
   }
-  function esc(s) { return String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+  function goalSub(falta, diasRestantes) {
+    if (falta <= 0) return 'Meta batida! Passou <b>' + brl(-falta) + '</b>.';
+    const r = ridesNeeded(falta);
+    const porDia = falta / Math.max(1, diasRestantes);
+    return 'Faltam <b>' + brl(falta) + '</b>' + (r.n ? ' (≈ ' + r.n + ' corridas)' : '') + ' · ' + brl(porDia) + ' por dia até o fim';
+  }
+  function itemHtml(e) {
+    const del = '<button class="x" type="button" data-del="' + e.id + '" aria-label="Apagar">×</button>';
+    if (e.type === 'ganho') {
+      const d = [e.corridas ? e.corridas + (e.corridas > 1 ? ' corridas' : ' corrida') : '', e.km ? dec(e.km, 0) + ' km' : '', e.horas ? hm(e.horas) : ''].filter(Boolean).join(' · ');
+      return '<li><span class="chip in">' + esc(e.app) + '</span><span class="desc">' + d + '</span><span class="amt num">' + brl(e.valor) + '</span>' + del + '</li>';
+    }
+    if (e.type === 'gasto') return '<li><span class="chip out">' + esc(e.cat) + '</span><span class="desc">' + esc(e.nota || '') + '</span><span class="amt num">−' + brl(e.valor) + '</span>' + del + '</li>';
+    if (e.type === 'jornada') return '<li><span class="chip info">Jornada</span><span class="desc">' + clock(e.start) + '–' + clock(e.end) + (e.km ? ' · ' + dec(e.km, 0) + ' km no painel' : '') + '</span><span class="amt num">' + hm(e.horas) + '</span>' + del + '</li>';
+    if (e.type === 'abast') return '<li><span class="chip out">' + FUEL + '</span><span class="desc">' + (e.litros ? dec(e.litros) + ' L · ' + brl(e.valor / e.litros) + '/L' : '') + (e.odo ? ' · ' + dec(e.odo, 0) + ' km' : '') + '</span><span class="amt num">−' + brl(e.valor) + '</span>' + del + '</li>';
+    return '';
+  }
+
+  function renderAbastList() {
+    const list = state.entries.filter((e) => e.type === 'abast').sort((a, b) => (a.date < b.date ? 1 : -1)).slice(0, 8);
+    $('abast-list').innerHTML = list.length
+      ? list.map((e) => itemHtml(e).replace('<span class="chip out">' + FUEL + '</span>', '<span class="chip info">' + new Date(e.date + 'T12:00').toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }) + '</span>')).join('')
+      : '<li class="empty">Nenhum abastecimento ainda. Lance a gasolina em <b>Gastos</b>.</li>';
+  }
 
   function renderAjustes() {
     const s = state.settings;
-    $('s-meta').value = dec(s.meta, 2); $('s-min').value = dec(s.min, 2);
-    $('s-kml').value = dec(s.kml, 1); $('s-preco').value = dec(s.preco, 2);
+    $('s-meta').value = dec(s.meta, 2); $('s-metasem').value = dec(s.metaSemana, 2); $('s-metames').value = dec(s.metaMes, 2);
+    $('s-min').value = dec(s.min, 2); $('s-kml').value = dec(s.kml, 1); $('s-preco').value = dec(s.preco, 2);
+    $('s-tipo').value = s.combTipo; tipoLabels(s.combTipo);
     previewAjustes();
+    const r = realKml(), box = $('s-real');
+    if (r) {
+      box.hidden = false;
+      const same = Math.abs(r.kml - s.kml) < 0.05;
+      box.innerHTML = '<span>Consumo real medido: <b class="num">' + dec(r.kml) + ' km/l</b> (' + r.n + ' abastecimentos, ' + dec(r.km, 0) + ' km).</span>' +
+        (same ? '<span class="muted">Você já está usando esse consumo.</span>' : '<button type="button" class="small" id="btn-use-real">Usar ' + dec(r.kml) + ' km/l</button>');
+      const b = $('btn-use-real');
+      if (b) b.onclick = () => { state.settings.kml = +r.kml.toFixed(2); save(); renderAll(); toast('Consumo atualizado para ' + dec(r.kml) + ' km/l'); };
+    } else {
+      box.hidden = false;
+      box.innerHTML = '<span class="muted">Registre pelo menos 2 abastecimentos com o km do painel para medir o consumo real do seu carro.</span>';
+    }
+  }
+  function tipoLabels(tipo) {
+    const c = COMBS[tipo] || COMBS.gasolina;
+    $('s-kml-l').textContent = 'Consumo (km/' + (c.un === 'm³' ? 'm³' : 'l') + ')';
+    $('s-preco-l').textContent = c.un === 'm³' ? 'Preço do m³ (R$)' : 'Preço do litro (R$)';
+    $('s-tipo-hint').textContent = 'Média nos postos: ' + brl(c.preco) + (c.faixa ? ' (' + c.faixa + ')' : '') + '. Coloque o preço do seu posto.';
   }
   function previewAjustes() {
     const kml = num($('s-kml').value), p = num($('s-preco').value);
@@ -482,10 +829,64 @@ nav.tabs button[aria-current="page"] { color: var(--sign); }
 
   function renderGanhoPreview() {
     const km = num($('g-km').value), v = num($('g-valor').value);
+    if (state.settings.modoComb !== 'km') { $('g-preview').innerHTML = 'A gasolina entra em <b>Gastos</b>.'; return; }
     if (!(km > 0)) { $('g-preview').innerHTML = 'Informe os km para calcularmos o combustível.'; return; }
     const c = km * custoKm();
     $('g-preview').innerHTML = 'Combustível estimado: <b>' + brl(c) + '</b>' + (v > 0 ? ' · lucro: <b>' + brl(v - c) + '</b>' : '');
   }
+  // ---------- várias linhas de gasto ----------
+  function addLine(cat) {
+    const id = uid();
+    const div = document.createElement('div');
+    div.className = 'xline'; div.dataset.line = id;
+    div.innerHTML =
+      '<div class="xline-top">' +
+        '<div class="field"><label for="xc-' + id + '">Categoria</label><select id="xc-' + id + '" data-k="cat">' + CATS.map((c) => '<option' + (c === cat ? ' selected' : '') + '>' + c + '</option>').join('') + '</select></div>' +
+        '<div class="field"><label for="xv-' + id + '">Valor (R$)</label><input id="xv-' + id + '" data-k="valor" inputmode="decimal" placeholder="0,00"></div>' +
+        '<button type="button" class="x" data-rm aria-label="Remover este gasto">×</button>' +
+      '</div>' +
+      '<div class="fuel"' + (cat === FUEL ? '' : ' hidden') + '>' +
+        '<div class="field"><label for="xl-' + id + '">Litros (opcional)</label><input id="xl-' + id + '" data-k="litros" inputmode="decimal" placeholder="15,9"></div>' +
+        '<div class="field"><label for="xo-' + id + '">Km do painel (opcional)</label><input id="xo-' + id + '" data-k="odo" inputmode="numeric" placeholder="84.520"></div>' +
+      '</div>' +
+      '<div class="field nota"' + (cat === FUEL ? ' hidden' : '') + '><label for="xn-' + id + '">Observação (opcional)</label><input id="xn-' + id + '" data-k="nota" placeholder="ex.: almoço"></div>';
+    $('x-lines').appendChild(div);
+    updateLines();
+    return div;
+  }
+  function readLines() {
+    return [...document.querySelectorAll('#x-lines .xline')].map((el) => {
+      const g = (k) => el.querySelector('[data-k="' + k + '"]');
+      return { el, cat: g('cat').value, valor: num(g('valor').value), litros: num(g('litros').value), odo: num(g('odo').value), nota: g('nota').value.trim() };
+    });
+  }
+  function updateLines() {
+    const lines = readLines();
+    lines.forEach((l) => {
+      l.el.querySelector('.fuel').hidden = l.cat !== FUEL;
+      l.el.querySelector('.nota').hidden = l.cat === FUEL;
+      l.el.querySelector('[data-rm]').hidden = lines.length === 1;
+    });
+    const tot = lines.reduce((s, l) => s + (l.valor > 0 ? l.valor : 0), 0);
+    const n = lines.filter((l) => l.valor > 0).length;
+    $('x-total').textContent = brl(tot);
+    $('x-save').textContent = n > 1 ? 'Salvar ' + n + ' gastos' : 'Salvar gasto';
+  }
+  function resetLines() { $('x-lines').innerHTML = ''; addLine(FUEL); }
+  $('x-quick').innerHTML = CATS.slice(0, 6).map((c) => '<button type="button" data-qc="' + c + '">+ ' + c + '</button>').join('');
+  $('x-quick').addEventListener('click', (ev) => {
+    const b = ev.target.closest('[data-qc]'); if (!b) return;
+    // reaproveita uma linha vazia, senão cria outra
+    const empty = readLines().find((l) => !(l.valor > 0));
+    let el;
+    if (empty) { empty.el.querySelector('[data-k="cat"]').value = b.dataset.qc; el = empty.el; updateLines(); }
+    else el = addLine(b.dataset.qc);
+    el.querySelector('[data-k="valor"]').focus();
+  });
+  $('x-add').addEventListener('click', () => { addLine('Alimentação').querySelector('[data-k="valor"]').focus(); });
+  $('x-lines').addEventListener('input', updateLines);
+  $('x-lines').addEventListener('change', updateLines);
+  $('x-lines').addEventListener('click', (ev) => { const rm = ev.target.closest('[data-rm]'); if (rm) { rm.closest('.xline').remove(); updateLines(); } });
 
   function renderCalc() {
     const s = state.settings;
@@ -503,11 +904,11 @@ nav.tabs button[aria-current="page"] { color: var(--sign); }
     else { cls = 'bad'; title = 'Melhor recusar'; msg = 'Paga só ' + brl(rpk) + ' por km. Seu mínimo é ' + brl(s.min) + '.'; }
     box.className = 'verdict ' + cls;
     box.innerHTML = '<strong>' + title + '</strong><p>' + msg + '</p>';
-    kv.innerHTML =
-      cell('Km total', dec(tk) + ' km') + cell('Combustível', brl(comb)) +
+    kv.innerHTML = cell('Km total', dec(tk) + ' km') + cell('Combustível', brl(comb)) +
       cell('Lucro da corrida', brl(lucro)) + cell('Lucro por hora', m > 0 ? brl(lucro / (m / 60)) : '—');
   }
-  function cell(l, v) { return '<div><span class="label">' + l + '</span><span class="num">' + v + '</span></div>'; }
+  const cell = (l, v) => '<div><span class="label">' + l + '</span><span class="num">' + v + '</span></div>';
+  const tile = (l, v) => '<div class="tile"><span class="label">' + l + '</span><span class="num">' + v + '</span></div>';
 
   function renderAlvo() {
     const alvo = num($('a-alvo').value), a = averages(), ck = custoKm();
@@ -515,22 +916,63 @@ nav.tabs button[aria-current="page"] { color: var(--sign); }
     $('a-base').innerHTML = (a.real ? 'Baseado nas suas ' + a.corridas + ' corridas registradas: ' : 'Ainda sem histórico, usando valores típicos: ') +
       'ticket médio <b>' + brl(a.ticket) + '</b>, <b>' + dec(a.kmCorrida) + ' km</b> e <b>' + hm(a.horasCorrida) + '</b> por corrida.';
     if (!(alvo > 0)) { $('a-kv').innerHTML = ''; return; }
-    if (lc <= 0) { $('a-kv').innerHTML = '<div style="grid-column:1/-1" class="preview">Com o ganho médio atual, cada corrida dá prejuízo. Aumente o mínimo por km.</div>'; return; }
+    if (lc <= 0) { $('a-kv').innerHTML = '<div style="grid-column:1/-1" class="muted">Com o ganho médio atual, cada corrida dá prejuízo. Aumente o mínimo por km.</div>'; return; }
     const n = Math.ceil(alvo / lc);
     $('a-kv').innerHTML = cell('Corridas', String(n)) + cell('Horas de trabalho', hm(n * a.horasCorrida)) +
       cell('Km rodados', dec(n * a.kmCorrida, 0) + ' km') + cell('Combustível', brl(n * a.kmCorrida * ck)) +
       cell('Faturamento bruto', brl(n * a.ticket)) + cell('Litros', dec((n * a.kmCorrida) / state.settings.kml) + ' L');
   }
 
+  // relatório mensal
+  let rep = (() => { const d = new Date(); return { y: d.getFullYear(), m: d.getMonth() }; })();
+  function renderRelatorio() {
+    const s = state.settings;
+    const title = new Date(rep.y, rep.m, 1).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+    $('m-title').textContent = title;
+    const now = new Date();
+    const isCurrent = rep.y === now.getFullYear() && rep.m === now.getMonth();
+    $('m-next').disabled = isCurrent;
+    const mo = sumStats(monthKeys(rep.y, rep.m, isCurrent));
+
+    $('r-lucro').textContent = brl(mo.lucro);
+    setRoad('r-road', 'r-fill', pct(mo.lucro, s.metaMes));
+    const falta = s.metaMes - mo.lucro;
+    $('r-meta-txt').textContent = falta <= 0 ? 'Meta do mês (' + brl0(s.metaMes) + ') batida!' : 'Faltam ' + brl(falta) + ' para a meta de ' + brl0(s.metaMes);
+
+    $('r-tiles').innerHTML =
+      tile('Faturamento', brl(mo.bruto)) + tile('Dias rodados', String(mo.dias)) + tile('Média por dia', mo.dias ? brl(mo.lucro / mo.dias) : '—') +
+      tile('Corridas', String(mo.corridas)) + tile('Km', dec(mo.km, 0)) + tile('Horas', hm(mo.horas)) +
+      tile('Lucro / hora', mo.horas ? brl(mo.lucro / mo.horas) : '—') + tile('Lucro / km', mo.km ? brl(mo.lucro / mo.km) : '—') +
+      tile('Melhor dia', mo.best ? new Date(mo.best.key + 'T12:00').toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }) + ' · ' + brl0(mo.best.lucro) : '—');
+
+    const apps = Object.entries(mo.apps).sort((a, b) => b[1].bruto - a[1].bruto);
+    const maxApp = apps.length ? apps[0][1].bruto : 1;
+    $('r-apps').innerHTML = apps.length ? apps.map(([name, v]) =>
+      '<div class="app-row"><b>' + esc(name) + '</b><div class="track"><div class="bar" style="width:' + pct(v.bruto, maxApp) + '%"></div></div><span class="num">' + brl0(v.bruto) + '</span>' +
+      '<span class="meta">' + v.corridas + ' corridas · ' + (v.corridas ? brl(v.bruto / v.corridas) : '—') + ' por corrida · ' + Math.round(pct(v.bruto, mo.bruto)) + '% do total</span></div>'
+    ).join('') : '<p class="empty">Nenhum ganho neste mês.</p>';
+
+    const cats = Object.entries(mo.cats).sort((a, b) => b[1] - a[1]);
+    $('r-table').innerHTML = '<tr><td>Faturamento bruto</td><td>' + brl(mo.bruto) + '</td></tr>' +
+      '<tr><td>' + (s.modoComb === 'km' ? 'Combustível (pelos km)' : 'Combustível') + '</td><td>−' + brl(mo.comb) + '</td></tr>' +
+      cats.map(([c, v]) => '<tr><td>' + esc(c) + '</td><td>−' + brl(v) + '</td></tr>').join('') +
+      '<tr class="total"><td>Lucro líquido</td><td>' + brl(mo.lucro) + '</td></tr>';
+
+    const rk = realKml();
+    $('r-fuel').innerHTML = cell('Abastecimentos', brl(mo.abast)) + cell('Litros', dec(mo.litros) + ' L') +
+      cell('Preço médio', mo.litros ? brl(mo.abast / mo.litros) + '/L' : '—') + cell('Consumo real', rk ? dec(rk.kml) + ' km/l' : '—');
+  }
+
   function renderAll() {
+    reindex();
     $('sample-banner').hidden = !state.sample;
     $('today-label').textContent = new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'short' });
-    renderHoje(); renderAjustes(); renderGanhoPreview(); renderCalc(); renderAlvo();
+    applyLook(); renderShift(); renderHoje(); renderAbastList(); renderAjustes(); renderGanhoPreview(); renderCalc(); renderAlvo(); renderRelatorio();
   }
 
   // ---------- interações ----------
   let toastT;
-  function toast(msg) { const t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 1800); }
+  function toast(msg) { const t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 2400); }
 
   function go(tab) {
     document.querySelectorAll('section[data-tab]').forEach((s) => (s.hidden = s.dataset.tab !== tab));
@@ -540,63 +982,167 @@ nav.tabs button[aria-current="page"] { color: var(--sign); }
   }
   document.querySelectorAll('nav.tabs button').forEach((b) => b.addEventListener('click', () => go(b.dataset.go)));
 
-  function seg(isGanho) {
-    $('seg-ganho').setAttribute('aria-pressed', isGanho); $('seg-gasto').setAttribute('aria-pressed', !isGanho);
-    $('f-ganho').hidden = !isGanho; $('f-gasto').hidden = isGanho;
-  }
-  $('seg-ganho').addEventListener('click', () => seg(true));
-  $('seg-gasto').addEventListener('click', () => seg(false));
+  document.querySelectorAll('[data-seg]').forEach((b) => b.addEventListener('click', () => {
+    document.querySelectorAll('[data-seg]').forEach((x) => x.setAttribute('aria-pressed', x === b));
+    document.querySelectorAll('[data-form]').forEach((f) => (f.hidden = f.dataset.form !== b.dataset.seg));
+  }));
 
-  function leaveSample() { if (state.sample) { state.entries = []; state.sample = false; } }
+  function leaveSample() { if (state.sample) { state.entries = []; state.shift = null; state.sample = false; } }
+  function addEntry(e) { leaveSample(); state.entries.push({ id: uid(), ...e }); save(); renderAll(); }
+
+  // folha inferior: corrida rápida e jornada
+  let sheetMode = null;
+  function openSheet(mode) {
+    sheetMode = mode;
+    const body = $('sheet-body');
+    if (mode === 'corrida') {
+      $('sheet-title').textContent = 'Nova corrida';
+      const last = state.settings.ultimoApp;
+      body.innerHTML =
+        '<div class="field"><label for="q-valor">Quanto recebeu (R$)</label><input id="q-valor" class="huge" inputmode="decimal" placeholder="0,00"></div>' +
+        '<div class="field"><span class="flabel">App</span><div class="chips" id="q-apps">' + APPS.slice(0, 4).map((a) => '<button type="button" data-app="' + a + '" aria-pressed="' + (a === last) + '">' + a + '</button>').join('') + '</div></div>' +
+        '<div class="field"><label for="q-km">Km da corrida (opcional)</label><input id="q-km" inputmode="decimal" placeholder="' + dec(averages().kmCorrida, 0) + '"></div>';
+      $('q-apps').addEventListener('click', (ev) => {
+        const b = ev.target.closest('[data-app]'); if (!b) return;
+        $('q-apps').querySelectorAll('button').forEach((x) => x.setAttribute('aria-pressed', x === b));
+      });
+      $('sheet-ok').textContent = 'Salvar corrida';
+    } else if (mode === 'iniciar') {
+      $('sheet-title').textContent = 'Iniciar o dia';
+      body.innerHTML = '<p class="muted">O app conta as horas sozinho até você encerrar.</p>' +
+        '<div class="field"><label for="q-odo">Km do painel agora (opcional)</label><input id="q-odo" inputmode="numeric" placeholder="84.520"><span class="hint">Com o km do início e do fim, o combustível fica mais exato.</span></div>';
+      $('sheet-ok').textContent = 'Começar';
+    } else if (mode === 'encerrar') {
+      const sh = state.shift;
+      $('sheet-title').textContent = 'Encerrar o dia';
+      body.innerHTML = '<p class="muted">Você está rodando há <b>' + hm((Date.now() - sh.start) / 3.6e6) + '</b>, desde ' + clock(sh.start) + '.</p>' +
+        '<div class="field"><label for="q-odo">Km do painel agora (opcional)</label><input id="q-odo" inputmode="numeric" placeholder="' + (sh.odo ? dec(sh.odo + 150, 0) : '84.670') + '"></div>';
+      $('sheet-ok').textContent = 'Encerrar';
+    }
+    $('backdrop').hidden = false; $('sheet').hidden = false;
+    setTimeout(() => { const f = body.querySelector('input'); if (f) f.focus(); }, 60);
+  }
+  function closeSheet() { $('backdrop').hidden = true; $('sheet').hidden = true; sheetMode = null; }
+  $('sheet-cancel').addEventListener('click', closeSheet);
+  $('backdrop').addEventListener('click', closeSheet);
+  document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape' && sheetMode) closeSheet(); });
+
+  $('sheet-form').addEventListener('submit', (ev) => {
+    ev.preventDefault();
+    if (sheetMode === 'corrida') {
+      const valor = num($('q-valor').value);
+      if (!(valor > 0)) { toast('Digite quanto recebeu na corrida'); $('q-valor').focus(); return; }
+      const app = ($('q-apps').querySelector('[aria-pressed="true"]') || {}).dataset?.app || 'Uber';
+      const km = num($('q-km').value);
+      state.settings.ultimoApp = app;
+      addEntry({ date: dayKey(), type: 'ganho', app, valor, corridas: 1, km: km > 0 ? km : +averages().kmCorrida.toFixed(1), horas: 0 });
+      closeSheet();
+      const t = dayStats(dayKey()), r = ridesNeeded(state.settings.meta - t.lucro);
+      toast('Corrida salva · ' + (r.done ? 'meta do dia batida! 🎉' : r.n ? 'faltam ' + r.n + ' corridas' : 'lucro hoje ' + brl(t.lucro)));
+    } else if (sheetMode === 'iniciar') {
+      leaveSample();
+      const odo = num($('q-odo').value);
+      state.shift = { start: Date.now(), odo: odo > 0 ? odo : null };
+      save(); closeSheet(); renderAll(); toast('Bom trabalho! Jornada iniciada às ' + clock(Date.now()));
+    } else if (sheetMode === 'encerrar') {
+      const sh = state.shift, end = Date.now(), odo = num($('q-odo').value);
+      const km = sh.odo && odo > sh.odo ? Math.round(odo - sh.odo) : 0;
+      state.entries.push({ id: uid(), date: dayKey(new Date(sh.start)), type: 'jornada', start: sh.start, end, horas: +((end - sh.start) / 3.6e6).toFixed(2), km });
+      state.shift = null; save(); closeSheet(); renderAll();
+      const t = dayStats(dayKey());
+      toast('Dia encerrado · ' + hm(t.horas) + ' · lucro ' + brl(t.lucro));
+    }
+  });
+
+  $('btn-ride').addEventListener('click', () => openSheet('corrida'));
+  $('btn-shift').addEventListener('click', () => openSheet(state.shift ? 'encerrar' : 'iniciar'));
 
   $('f-ganho').addEventListener('submit', (ev) => {
     ev.preventDefault();
     const valor = num($('g-valor').value);
     if (!(valor > 0)) { toast('Informe o valor recebido'); $('g-valor').focus(); return; }
-    leaveSample();
-    const km = num($('g-km').value) || 0;
-    state.entries.push({ id: uid(), date: $('g-data').value || dayKey(), type: 'ganho', app: $('g-app').value, valor,
-      corridas: Math.max(0, Math.round(num($('g-corridas').value) || 0)), km, horas: num($('g-horas').value) || 0, comb: +(km * custoKm()).toFixed(2) });
-    save();
+    addEntry({ date: $('g-data').value || dayKey(), type: 'ganho', app: $('g-app').value, valor,
+      corridas: Math.max(0, Math.round(num($('g-corridas').value) || 0)), km: num($('g-km').value) || 0, horas: num($('g-horas').value) || 0 });
     ['g-valor', 'g-corridas', 'g-km', 'g-horas'].forEach((id) => ($(id).value = ''));
-    renderAll(); toast('Ganho salvo'); go('hoje');
+    renderGanhoPreview(); toast('Ganhos salvos'); go('hoje');
   });
 
   $('f-gasto').addEventListener('submit', (ev) => {
     ev.preventDefault();
-    const valor = num($('x-valor').value);
-    if (!(valor > 0)) { toast('Informe o valor do gasto'); $('x-valor').focus(); return; }
+    const lines = readLines().filter((l) => l.valor > 0);
+    if (!lines.length) { toast('Informe o valor de pelo menos um gasto'); const f = $('x-lines').querySelector('[data-k="valor"]'); if (f) f.focus(); return; }
     leaveSample();
-    state.entries.push({ id: uid(), date: $('x-data').value || dayKey(), type: 'gasto', cat: $('x-cat').value, valor, nota: $('x-nota').value.trim() });
-    save();
-    ['x-valor', 'x-nota'].forEach((id) => ($(id).value = ''));
-    renderAll(); toast('Gasto salvo'); go('hoje');
+    const date = $('x-data').value || dayKey();
+    let precoNovo = null;
+    lines.forEach((l) => {
+      if (l.cat === FUEL) {
+        const litros = l.litros > 0 ? l.litros : null;
+        if (litros) precoNovo = l.valor / litros;
+        state.entries.push({ id: uid(), date, type: 'abast', valor: l.valor, litros, odo: l.odo > 0 ? l.odo : null });
+      } else {
+        state.entries.push({ id: uid(), date, type: 'gasto', cat: l.cat, valor: l.valor, nota: l.nota });
+      }
+    });
+    if (precoNovo) state.settings.preco = +precoNovo.toFixed(3);
+    save(); renderAll(); resetLines();
+    const tot = lines.reduce((s, l) => s + l.valor, 0);
+    toast((lines.length > 1 ? lines.length + ' gastos salvos' : 'Gasto salvo') + ' · ' + brl(tot) + (precoNovo ? ' · litro a ' + brl(precoNovo) : ''));
+    go('hoje');
   });
 
-  $('today-list').addEventListener('click', (ev) => {
+  function onListClick(ev) {
     const id = ev.target.closest('[data-del]')?.dataset.del;
     if (!id) return;
     state.entries = state.entries.filter((e) => e.id !== id);
     save(); renderAll(); toast('Lançamento apagado');
-  });
+  }
+  $('today-list').addEventListener('click', onListClick);
+  $('abast-list').addEventListener('click', onListClick);
 
   $('f-ajustes').addEventListener('submit', (ev) => {
     ev.preventDefault();
-    const s = { meta: num($('s-meta').value), min: num($('s-min').value), kml: num($('s-kml').value), preco: num($('s-preco').value) };
-    if (!(s.meta > 0 && s.min > 0 && s.kml > 0 && s.preco > 0)) { toast('Preencha todos os campos com valores maiores que zero'); return; }
-    state.settings = s; save(); renderAll(); toast('Ajustes salvos');
+    const v = { meta: num($('s-meta').value), metaSemana: num($('s-metasem').value), metaMes: num($('s-metames').value),
+      min: num($('s-min').value), kml: num($('s-kml').value), preco: num($('s-preco').value) };
+    if (Object.values(v).some((x) => !(x > 0))) { toast('Preencha todos os campos com valores maiores que zero'); return; }
+    v.combTipo = $('s-tipo').value;
+    Object.assign(state.settings, v); save(); renderAll(); toast('Ajustes salvos');
   });
+  $('s-tipo').innerHTML = Object.entries(COMBS).map(([k, c]) => '<option value="' + k + '">' + c.nome + ' · média ' + brl(c.preco) + '</option>').join('');
+  $('s-tipo').addEventListener('change', () => {
+    // troca de combustível: sugere o preço médio e um consumo típico
+    const c = COMBS[$('s-tipo').value];
+    $('s-preco').value = dec(c.preco, 2);
+    if (num($('s-kml').value) === COMBS[state.settings.combTipo]?.kml || !(num($('s-kml').value) > 0)) $('s-kml').value = dec(c.kml, 1);
+    tipoLabels($('s-tipo').value); previewAjustes();
+  });
+
+  function renderFlex() {
+    const e = num($('f-eta').value), g = num($('f-gas').value), box = $('f-verdict');
+    if (!(e > 0 && g > 0)) { box.className = 'verdict idle'; box.innerHTML = '<strong>Preencha os dois preços</strong>'; return; }
+    const r = e / g, lim = g * 0.7;
+    if (r <= 0.7) { box.className = 'verdict good'; box.innerHTML = '<strong>Abasteça com etanol</strong><p>O etanol custa ' + Math.round(r * 100) + '% da gasolina. Compensa até ' + brl(lim) + ' o litro.</p>'; }
+    else { box.className = 'verdict warn'; box.innerHTML = '<strong>Abasteça com gasolina</strong><p>O etanol custa ' + Math.round(r * 100) + '% da gasolina. Ele só compensa até ' + brl(lim) + ' o litro.</p>'; }
+  }
+  $('f-eta').value = dec(COMBS.etanol.preco, 2); $('f-gas').value = dec(COMBS.gasolina.preco, 2);
+  ['f-eta', 'f-gas'].forEach((id) => $(id).addEventListener('input', renderFlex));
+  renderFlex();
+  document.querySelectorAll('[data-theme-opt]').forEach((b) => b.addEventListener('click', () => { state.settings.tema = b.dataset.themeOpt; save(); applyLook(); }));
+  document.querySelectorAll('[data-size-opt]').forEach((b) => b.addEventListener('click', () => { state.settings.letra = b.dataset.sizeOpt; save(); applyLook(); }));
+  document.querySelectorAll('[data-comb-opt]').forEach((b) => b.addEventListener('click', () => { state.settings.modoComb = b.dataset.combOpt; save(); renderAll(); }));
+
   ['s-kml', 's-preco'].forEach((id) => $(id).addEventListener('input', previewAjustes));
   ['g-km', 'g-valor'].forEach((id) => $(id).addEventListener('input', renderGanhoPreview));
   ['c-valor', 'c-busca', 'c-km', 'c-min'].forEach((id) => $(id).addEventListener('input', renderCalc));
   $('a-alvo').addEventListener('input', renderAlvo);
+  $('m-prev').addEventListener('click', () => { rep.m--; if (rep.m < 0) { rep.m = 11; rep.y--; } renderRelatorio(); });
+  $('m-next').addEventListener('click', () => { rep.m++; if (rep.m > 11) { rep.m = 0; rep.y++; } renderRelatorio(); });
 
-  $('btn-clear-sample').addEventListener('click', () => { state.entries = []; state.sample = false; save(); renderAll(); toast('Pronto! Comece registrando seus ganhos'); });
-  $('btn-sample').addEventListener('click', () => { state = sampleState(); save(); renderAll(); toast('Exemplo carregado'); go('hoje'); });
+  $('btn-clear-sample').addEventListener('click', () => { state.entries = []; state.shift = null; state.sample = false; save(); renderAll(); toast('Pronto! Toque em Iniciar dia para começar'); });
+  $('btn-sample').addEventListener('click', () => { const keep = state.settings; state = sampleState(); state.settings.tema = keep.tema; state.settings.letra = keep.letra; save(); renderAll(); toast('Exemplo carregado'); go('hoje'); });
   $('btn-wipe').addEventListener('click', () => { $('wipe-confirm').hidden = false; });
   $('btn-wipe-no').addEventListener('click', () => { $('wipe-confirm').hidden = true; });
   $('btn-wipe-yes').addEventListener('click', () => {
-    state = { settings: { ...DEFAULTS }, entries: [], sample: false }; save();
+    state = { settings: { ...DEFAULTS, tema: state.settings.tema, letra: state.settings.letra }, entries: [], shift: null, sample: false }; save();
     $('wipe-confirm').hidden = true; renderAll(); toast('Dados apagados'); go('hoje');
   });
 
@@ -604,12 +1150,18 @@ nav.tabs button[aria-current="page"] { color: var(--sign); }
   state = load() || sampleState();
   state.settings = { ...DEFAULTS, ...(state.settings || {}) };
   state.entries = state.entries || [];
-  $('g-data').value = dayKey(); $('x-data').value = dayKey();
+  state.shift = state.shift || null;
+  $('g-app').innerHTML = APPS.map((a) => '<option>' + a + '</option>').join('');
+  ['g-data', 'x-data'].forEach((id) => ($(id).value = dayKey()));
+  resetLines();
   renderAll();
   const start = (location.hash || '').slice(1);
-  go(['hoje', 'lancar', 'calcular', 'ajustes'].includes(start) ? start : 'hoje');
+  go(['hoje', 'lancar', 'calcular', 'relatorio', 'ajustes'].includes(start) ? start : 'hoje');
 
-  if ('serviceWorker' in navigator && location.protocol === 'https:') {
+  // atualiza o relógio da jornada
+  setInterval(() => { if (state.shift) { renderShift(); renderHoje(); } }, 30000);
+
+  if ('serviceWorker' in navigator && location.protocol === 'https:' && location.hostname.endsWith('github.io')) {
     navigator.serviceWorker.register('sw.js').catch(() => {});
   }
 })();
