@@ -189,7 +189,7 @@ footer { padding-block: 24px 40px; font-size: 0.82rem; color: var(--muted); }
         <h2>Planos</h2>
         <div class="toggle" role="group" aria-label="Forma de pagamento">
           <button type="button" id="b-mes" aria-pressed="true">Mensal</button>
-          <button type="button" id="b-ano" aria-pressed="false">Anual −33%</button>
+          <button type="button" id="b-ano" aria-pressed="false">Anual −17%</button>
         </div>
       </div>
       <div class="plans">
@@ -210,7 +210,7 @@ footer { padding-block: 24px 40px; font-size: 0.82rem; color: var(--muted); }
         <div class="plan pro">
           <span class="tag">Mais escolhido</span>
           <h3>Pro</h3>
-          <div class="price" id="price"><span id="price-v">R$ 14,90</span> <small id="price-u">/mês</small></div>
+          <div class="price" id="price"><span id="price-v">R$ 9,90</span> <small id="price-u">/mês</small></div>
           <p class="muted" id="price-note">Menos que um almoço por mês.</p>
           <ul>
             <li>Tudo do Grátis</li>
@@ -259,7 +259,7 @@ footer { padding-block: 24px 40px; font-size: 0.82rem; color: var(--muted); }
   // Coloque aqui o seu WhatsApp com DDI e DDD (só números, ex.: '5511999999999')
   // para o botão "Quero o Pro" abrir uma conversa com você.
   const WHATSAPP = '';
-  const PRICES = { mes: { v: 'R$ 14,90', u: '/mês', note: 'Menos que um almoço por mês.' }, ano: { v: 'R$ 119', u: '/ano', note: 'Sai por R$ 9,92 por mês.' } };
+  const PRICES = { mes: { v: 'R$ 9,90', u: '/mês', note: 'Menos que um café por semana.' }, ano: { v: 'R$ 99', u: '/ano', note: 'Sai por R$ 8,25 por mês: 2 meses de graça.' } };
   let plano = 'mes';
   const $ = (id) => document.getElementById(id);
   function render() {
