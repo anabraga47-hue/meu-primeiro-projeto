@@ -173,6 +173,8 @@ button.x { padding: 4px 9px; font-size: 1rem; line-height: 1; color: var(--muted
 .xline input, .xline select { background: var(--surface); }
 .xline .fuel { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
 .xline .fuel[hidden] { display: none; }
+.fuelcalc { font-size: 0.9rem; color: var(--ink); background: var(--surface); border: 1px dashed var(--line); border-radius: 8px; padding: 8px 10px; }
+.fuelcalc b { font-family: var(--font-num); }
 .xtotal { display: flex; justify-content: space-between; align-items: baseline; font-weight: 800; font-size: 1.05rem; border-top: 2px solid var(--ink); padding-top: 10px; }
 
 /* Calculadora */
@@ -786,7 +788,7 @@ nav.tabs button[aria-current="page"] { color: var(--sign); }
     }
     if (e.type === 'gasto') return '<li><span class="chip out">' + esc(e.cat) + '</span><span class="desc">' + esc(e.nota || '') + '</span><span class="amt num">−' + brl(e.valor) + '</span>' + del + '</li>';
     if (e.type === 'jornada') return '<li><span class="chip info">Jornada</span><span class="desc">' + clock(e.start) + '–' + clock(e.end) + (e.km ? ' · ' + dec(e.km, 0) + ' km no painel' : '') + '</span><span class="amt num">' + hm(e.horas) + '</span>' + del + '</li>';
-    if (e.type === 'abast') return '<li><span class="chip out">' + FUEL + '</span><span class="desc">' + (e.litros ? dec(e.litros) + ' L · ' + brl(e.valor / e.litros) + '/L' : '') + (e.odo ? ' · ' + dec(e.odo, 0) + ' km' : '') + '</span><span class="amt num">−' + brl(e.valor) + '</span>' + del + '</li>';
+    if (e.type === 'abast') return '<li><span class="chip out">' + FUEL + '</span><span class="desc">' + (e.litros ? dec(e.litros) + ' ' + fuelUn() + ' · rende ≈ ' + dec(e.litros * state.settings.kml, 0) + ' km' : '') + (e.odo ? ' · painel ' + dec(e.odo, 0) : '') + '</span><span class="amt num">−' + brl(e.valor) + '</span>' + del + '</li>';
     return '';
   }
 
@@ -846,8 +848,9 @@ nav.tabs button[aria-current="page"] { color: var(--sign); }
         '<button type="button" class="x" data-rm aria-label="Remover este gasto">×</button>' +
       '</div>' +
       '<div class="fuel"' + (cat === FUEL ? '' : ' hidden') + '>' +
-        '<div class="field"><label for="xl-' + id + '">Litros (opcional)</label><input id="xl-' + id + '" data-k="litros" inputmode="decimal" placeholder="15,9"></div>' +
+        '<div class="field"><label for="xp-' + id + '">Preço do ' + (fuelUn() === 'm³' ? 'm³' : 'litro') + ' (R$)</label><input id="xp-' + id + '" data-k="preco" inputmode="decimal" value="' + dec(state.settings.preco, 2) + '"></div>' +
         '<div class="field"><label for="xo-' + id + '">Km do painel (opcional)</label><input id="xo-' + id + '" data-k="odo" inputmode="numeric" placeholder="84.520"></div>' +
+        '<div class="fuelcalc muted" data-fuelcalc style="grid-column:1/-1"></div>' +
       '</div>' +
       '<div class="field nota"' + (cat === FUEL ? ' hidden' : '') + '><label for="xn-' + id + '">Observação (opcional)</label><input id="xn-' + id + '" data-k="nota" placeholder="ex.: almoço"></div>';
     $('x-lines').appendChild(div);
@@ -857,8 +860,17 @@ nav.tabs button[aria-current="page"] { color: var(--sign); }
   function readLines() {
     return [...document.querySelectorAll('#x-lines .xline')].map((el) => {
       const g = (k) => el.querySelector('[data-k="' + k + '"]');
-      return { el, cat: g('cat').value, valor: num(g('valor').value), litros: num(g('litros').value), odo: num(g('odo').value), nota: g('nota').value.trim() };
+      const valor = num(g('valor').value), preco = num(g('preco').value);
+      return { el, cat: g('cat').value, valor, preco, litros: valor > 0 && preco > 0 ? valor / preco : NaN, odo: num(g('odo').value), nota: g('nota').value.trim() };
     });
+  }
+  const fuelUn = () => (COMBS[state.settings.combTipo] || COMBS.gasolina).un;
+  // calcula litros, km que rende e corridas a partir do valor pago
+  function fuelCalcText(l) {
+    if (!(l.valor > 0)) return 'Digite quanto pagou e calculamos quantos litros você colocou.';
+    if (!(l.preco > 0)) return 'Informe o preço do litro.';
+    const un = fuelUn(), km = l.litros * state.settings.kml, a = averages();
+    return '≈ <b>' + dec(l.litros) + ' ' + un + '</b> · rende ≈ <b>' + dec(km, 0) + ' km</b> (consumo de ' + dec(state.settings.kml) + ' km/' + (un === 'm³' ? 'm³' : 'l') + ') · dá para ≈ <b>' + Math.floor(km / a.kmCorrida) + ' corridas</b>';
   }
   function updateLines() {
     const lines = readLines();
@@ -866,6 +878,7 @@ nav.tabs button[aria-current="page"] { color: var(--sign); }
       l.el.querySelector('.fuel').hidden = l.cat !== FUEL;
       l.el.querySelector('.nota').hidden = l.cat === FUEL;
       l.el.querySelector('[data-rm]').hidden = lines.length === 1;
+      if (l.cat === FUEL) l.el.querySelector('[data-fuelcalc]').innerHTML = fuelCalcText(l);
     });
     const tot = lines.reduce((s, l) => s + (l.valor > 0 ? l.valor : 0), 0);
     const n = lines.filter((l) => l.valor > 0).length;
@@ -1076,8 +1089,8 @@ nav.tabs button[aria-current="page"] { color: var(--sign); }
     let precoNovo = null;
     lines.forEach((l) => {
       if (l.cat === FUEL) {
-        const litros = l.litros > 0 ? l.litros : null;
-        if (litros) precoNovo = l.valor / litros;
+        const litros = l.litros > 0 ? +l.litros.toFixed(2) : null;
+        if (l.preco > 0) precoNovo = l.preco;
         state.entries.push({ id: uid(), date, type: 'abast', valor: l.valor, litros, odo: l.odo > 0 ? l.odo : null });
       } else {
         state.entries.push({ id: uid(), date, type: 'gasto', cat: l.cat, valor: l.valor, nota: l.nota });
@@ -1086,7 +1099,8 @@ nav.tabs button[aria-current="page"] { color: var(--sign); }
     if (precoNovo) state.settings.preco = +precoNovo.toFixed(3);
     save(); renderAll(); resetLines();
     const tot = lines.reduce((s, l) => s + l.valor, 0);
-    toast((lines.length > 1 ? lines.length + ' gastos salvos' : 'Gasto salvo') + ' · ' + brl(tot) + (precoNovo ? ' · litro a ' + brl(precoNovo) : ''));
+    const fl = lines.filter((l) => l.cat === FUEL && l.litros > 0).reduce((s, l) => s + l.litros, 0);
+    toast((lines.length > 1 ? lines.length + ' gastos salvos' : 'Gasto salvo') + ' · ' + brl(tot) + (fl ? ' · ' + dec(fl) + ' ' + fuelUn() + ' de combustível' : ''));
     go('hoje');
   });
 
