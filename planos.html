@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>RodaLucro Planos</title>
+<meta name="description" content="Saiba quanto você lucra de verdade como motorista de aplicativo. Ganhos, gastos, combustível e metas no celular.">
+<meta name="theme-color" content="#0b6e4f">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Overpass:wght@400;600;800;900&family=Overpass+Mono:wght@500;700&display=swap">
+<style>
+/* Layout: página de vendas de uma coluna; placa de rodovia no topo, planos lado a lado no desktop. */
+:root {
+  --bg: #eef2f0; --surface: #ffffff; --ink: #14201c; --muted: #5a6a65; --line: #d4ddd9;
+  --sign: #0b6e4f; --sign-ink: #ffffff; --mark: #f2b705; --asphalt: #2b3330; --good: #1a7f4b;
+  --font-display: "Overpass", "Arial Narrow", system-ui, sans-serif;
+  --font-num: "Overpass Mono", ui-monospace, Menlo, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --bg: #0e1412; --surface: #161f1c; --ink: #e5ede9; --muted: #93a39d; --line: #26332e; --sign: #0d7a58; --mark: #f5c430; --asphalt: #0a0e0d; --good: #3cc483; color-scheme: dark; }
+}
+:root[data-theme="dark"] { --bg: #0e1412; --surface: #161f1c; --ink: #e5ede9; --muted: #93a39d; --line: #26332e; --sign: #0d7a58; --mark: #f5c430; --asphalt: #0a0e0d; --good: #3cc483; color-scheme: dark; }
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { margin: 0; }
+body { background: var(--bg); color: var(--ink); font-family: var(--font-display); font-size: 16px; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+.wrap { max-width: 980px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+header.top { padding-block: 16px; }
+header.top .wrap { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.brand { font-weight: 900; font-size: 1.35rem; display: flex; align-items: center; gap: 8px; color: var(--ink); text-decoration: none; }
+.brand svg { width: 28px; height: 28px; }
+a.btn { display: inline-flex; align-items: center; justify-content: center; text-decoration: none; font-weight: 800; border-radius: 12px; padding: 13px 20px; border: 2px solid var(--sign); color: var(--sign); background: transparent; text-align: center; }
+a.btn.solid { background: var(--sign); color: var(--sign-ink); }
+a.btn.mark { background: var(--mark); border-color: var(--mark); color: #1b1b1b; }
+a.btn:focus-visible { outline: 3px solid var(--mark); outline-offset: 2px; }
+:root:not([data-theme="light"]) a.btn:not(.solid):not(.mark) { color: var(--ink); }
+h1, h2, h3 { margin: 0; text-wrap: balance; line-height: 1.15; }
+h1 { font-size: clamp(2rem, 6vw, 3.2rem); font-weight: 900; letter-spacing: -0.02em; }
+h2 { font-size: clamp(1.5rem, 4vw, 2.1rem); font-weight: 900; }
+h3 { font-size: 1.1rem; font-weight: 800; }
+p { margin: 0; }
+.muted { color: var(--muted); }
+section { padding-block: 40px; }
+
+/* Herói */
+.hero { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr); gap: 32px; align-items: center; padding-block: 24px 48px; }
+.hero p.lead { font-size: 1.15rem; color: var(--muted); max-width: 34em; }
+.hero .ctas { display: flex; gap: 12px; flex-wrap: wrap; }
+.hero-txt { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+.small { font-size: 0.85rem; color: var(--muted); }
+.sign { background: var(--sign); color: var(--sign-ink); border-radius: 18px; padding: 8px; max-width: 420px; justify-self: center; width: 100%; }
+.sign-in { border: 3px solid var(--sign-ink); border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 14px; }
+.sign .lbl { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; opacity: .85; }
+.sign .big { font-family: var(--font-num); font-weight: 700; font-size: 2.6rem; line-height: 1; }
+.road { position: relative; height: 22px; background: var(--asphalt); border-radius: 4px; overflow: hidden; }
+.road::after { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 2px; transform: translateY(-50%); background: repeating-linear-gradient(90deg, rgba(255,255,255,.55) 0 14px, transparent 14px 26px); }
+.road i { position: absolute; inset: 0 auto 0 0; width: 72%; background: var(--mark); z-index: 1; }
+.sign .need { font-weight: 800; font-size: 1.3rem; }
+.sign .need small { display: block; font-weight: 400; font-size: 0.9rem; opacity: .9; }
+
+/* Dores e recursos */
+.pain { background: var(--surface); border-block: 1px solid var(--line); }
+.pain .wrap { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 32px; align-items: center; }
+.calc { font-family: var(--font-num); font-size: 0.95rem; border: 1px solid var(--line); border-radius: 12px; padding: 16px; display: grid; grid-template-columns: 1fr auto; gap: 6px 16px; }
+.calc .neg { color: #c0392b; }
+.calc .tot { border-top: 2px solid var(--ink); padding-top: 6px; font-weight: 700; }
+.features { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-top: 24px; }
+.feat { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 18px; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.feat svg { width: 28px; height: 28px; color: var(--sign); }
+:root:not([data-theme="light"]) .feat svg { color: var(--good); }
+.steps { list-style: none; padding: 0; margin: 24px 0 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; counter-reset: s; }
+.steps li { counter-increment: s; display: flex; flex-direction: column; gap: 6px; padding-top: 12px; border-top: 3px dashed var(--mark); }
+.steps li::before { content: "Passo " counter(s); font-size: 0.75rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+
+/* Planos */
+.plans { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-top: 24px; align-items: start; }
+.plan { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 24px; display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.plan.pro { border: 3px solid var(--sign); }
+.tag { align-self: flex-start; background: var(--mark); color: #1b1b1b; font-size: 0.75rem; font-weight: 800; padding: 3px 10px; border-radius: 999px; }
+.price { font-family: var(--font-num); font-weight: 700; font-size: 2.4rem; line-height: 1; }
+.price small { font-size: 1rem; font-weight: 500; color: var(--muted); }
+.plan ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; }
+.plan li { padding-left: 26px; position: relative; }
+.plan li::before { content: "✓"; position: absolute; left: 0; color: var(--good); font-weight: 900; }
+.plan li.off { color: var(--muted); }
+.plan li.off::before { content: "–"; color: var(--muted); }
+.toggle { display: inline-grid; grid-template-columns: 1fr 1fr; border: 1px solid var(--line); border-radius: 12px; padding: 4px; gap: 4px; background: var(--surface); }
+.toggle button { font: inherit; font-weight: 700; border: 0; background: transparent; color: var(--muted); border-radius: 9px; padding: 8px 14px; cursor: pointer; }
+.toggle button[aria-pressed="true"] { background: var(--sign); color: var(--sign-ink); }
+.toggle button:focus-visible { outline: 3px solid var(--mark); }
+
+/* Perguntas */
+details { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
+details + details { margin-top: 10px; }
+summary { font-weight: 800; cursor: pointer; }
+details p { margin-top: 8px; color: var(--muted); }
+.final { background: var(--sign); color: var(--sign-ink); border-radius: 18px; padding: 32px; display: flex; flex-direction: column; gap: 14px; align-items: flex-start; }
+footer { padding-block: 24px 40px; font-size: 0.82rem; color: var(--muted); }
+
+@media (max-width: 760px) {
+  .hero, .pain .wrap, .plans { grid-template-columns: minmax(0, 1fr); }
+  .features, .steps { grid-template-columns: minmax(0, 1fr); }
+  section { padding-block: 32px; }
+  .final { padding: 24px; }
+}
+@media (min-width: 761px) and (max-width: 900px) { .features { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="index.html">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><rect x="1" y="1" width="30" height="30" rx="7" fill="#0b6e4f"/><rect x="4" y="4" width="24" height="24" rx="4" fill="none" stroke="#fff" stroke-width="1.6"/><path d="M16 8v4M16 15v3M16 21v3" stroke="#f2b705" stroke-width="2.6" stroke-linecap="round"/></svg>
+      RodaLucro
+    </a>
+    <a class="btn" href="index.html">Abrir o app</a>
+  </div>
+</header>
+
+<main>
+  <div class="wrap hero">
+    <div class="hero-txt">
+      <h1>Saiba quanto você lucra de verdade em cada corrida</h1>
+      <p class="lead">O app mostra o faturamento. O RodaLucro mostra o que sobra depois da gasolina, do almoço e da lavagem, e quantas corridas faltam para bater a sua meta.</p>
+      <div class="ctas">
+        <a class="btn solid" href="index.html">Começar grátis</a>
+        <a class="btn" href="#planos">Ver planos</a>
+      </div>
+      <p class="small">Funciona no navegador do celular. Não precisa baixar nada.</p>
+    </div>
+    <div class="sign" aria-label="Exemplo da tela do app">
+      <div class="sign-in">
+        <span class="lbl">Lucro líquido hoje</span>
+        <span class="big">R$ 216,40</span>
+        <div class="road"><i></i></div>
+        <div class="need">Faltam 7 corridas<small>R$ 83,60 para a meta de R$ 300 · cerca de 2h20</small></div>
+      </div>
+    </div>
+  </div>
+
+  <section class="pain">
+    <div class="wrap">
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <h2>O app diz R$ 320. Mas quanto ficou no seu bolso?</h2>
+        <p class="muted">Combustível, comida, lavagem e manutenção comem uma parte grande do que você fatura. Sem anotar, você não sabe se o dia valeu a pena nem quanto precisa rodar amanhã.</p>
+      </div>
+      <div class="calc" aria-label="Exemplo de um dia de trabalho">
+        <span>Faturamento no app</span><span>R$ 320,00</span>
+        <span>Combustível</span><span class="neg">−R$ 110,00</span>
+        <span>Almoço e café</span><span class="neg">−R$ 32,00</span>
+        <span>Lavagem</span><span class="neg">−R$ 35,00</span>
+        <span>Reserva p/ manutenção</span><span class="neg">−R$ 19,20</span>
+        <span class="tot">Sobrou de verdade</span><span class="tot">R$ 123,80</span>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <h2>Tudo o que o motorista precisa, no celular</h2>
+      <div class="features">
+        <div class="feat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg><h3>Corrida em 2 toques</h3><p class="muted">Terminou a corrida, digitou o valor, pronto.</p></div>
+        <div class="feat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16M7 16V10M12 16V6M17 16v-4"/></svg><h3>Meta do dia, semana e mês</h3><p class="muted">Veja quantas corridas e horas faltam para chegar lá.</p></div>
+        <div class="feat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V5a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v16M3 21h12M14 9h2a2 2 0 0 1 2 2v6a1 1 0 0 0 2 0V8l-3-3"/></svg><h3>Combustível na ponta do lápis</h3><p class="muted">Digite quanto pagou e veja litros, km que rende e o consumo real do carro.</p></div>
+        <div class="feat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 12h2M14 12h2M8 16h2M14 16h2"/></svg><h3>Vale a pena aceitar?</h3><p class="muted">Calcule na hora quanto a corrida paga por km.</p></div>
+        <div class="feat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.4-.6-.6-2.4z"/></svg><h3>Aviso de troca de óleo</h3><p class="muted">E uma reserva por km para pneu e revisão não pegarem você de surpresa.</p></div>
+        <div class="feat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 17v-3M12 17v-6M15 17v-4"/></svg><h3>Relatório do mês</h3><p class="muted">Qual app rendeu mais, seu melhor dia e para onde foi o dinheiro.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <h2>Como funciona</h2>
+      <ol class="steps">
+        <li><h3>Configure em 30 segundos</h3><p class="muted">Diga o combustível, o consumo do carro e quanto quer lucrar por dia.</p></li>
+        <li><h3>Rode normalmente</h3><p class="muted">Toque em Iniciar dia, lance cada corrida e os gastos quando acontecerem.</p></li>
+        <li><h3>Acompanhe o lucro</h3><p class="muted">A placa verde mostra o lucro na hora e quantas corridas faltam para a meta.</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <section id="planos">
+    <div class="wrap">
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap">
+        <h2>Planos</h2>
+        <div class="toggle" role="group" aria-label="Forma de pagamento">
+          <button type="button" id="b-mes" aria-pressed="true">Mensal</button>
+          <button type="button" id="b-ano" aria-pressed="false">Anual −33%</button>
+        </div>
+      </div>
+      <div class="plans">
+        <div class="plan">
+          <h3>Grátis</h3>
+          <div class="price">R$ 0</div>
+          <p class="muted">Para começar a controlar o dia a dia.</p>
+          <ul>
+            <li>Lançamento de corridas e gastos</li>
+            <li>Lucro líquido e meta do dia</li>
+            <li>Calculadora "vale a pena aceitar?"</li>
+            <li>Etanol ou gasolina?</li>
+            <li class="off">Dados só no aparelho</li>
+            <li class="off">Relatório do mês e metas da semana/mês</li>
+          </ul>
+          <a class="btn" href="index.html">Começar grátis</a>
+        </div>
+        <div class="plan pro">
+          <span class="tag">Mais escolhido</span>
+          <h3>Pro</h3>
+          <div class="price" id="price"><span id="price-v">R$ 14,90</span> <small id="price-u">/mês</small></div>
+          <p class="muted" id="price-note">Menos que um almoço por mês.</p>
+          <ul>
+            <li>Tudo do Grátis</li>
+            <li>Dados salvos na nuvem, em qualquer celular</li>
+            <li>Relatório mensal completo por app</li>
+            <li>Metas da semana e do mês</li>
+            <li>Consumo real do carro e aviso de troca de óleo</li>
+            <li>Resumo para WhatsApp e backup automático</li>
+            <li>Suporte pelo WhatsApp</li>
+          </ul>
+          <a class="btn mark" id="cta-pro" href="#em-breve">Quero o Pro</a>
+          <p class="small" id="em-breve">A assinatura abre em breve. Comece grátis agora: seus dados passam para o Pro quando você assinar.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap" style="max-width:760px">
+      <h2 style="margin-bottom:18px">Perguntas frequentes</h2>
+      <details><summary>Funciona com Uber, 99 e inDrive?</summary><p>Sim. Você escolhe o app em cada corrida e vê depois qual rendeu mais. O RodaLucro não tem ligação com essas empresas e não pede a sua senha delas.</p></details>
+      <details><summary>Preciso baixar na loja de aplicativos?</summary><p>Não. Abra o link no Chrome ou no Safari e toque em "Adicionar à tela inicial". Ele fica com ícone, igual a um aplicativo.</p></details>
+      <details><summary>Funciona sem internet?</summary><p>Sim. Depois de aberto uma vez, você consegue lançar corridas e gastos mesmo sem sinal.</p></details>
+      <details><summary>Posso cancelar quando quiser?</summary><p>Sim. Sem fidelidade e sem multa. Se cancelar, você volta para o plano Grátis e não perde o que já lançou.</p></details>
+      <details><summary>Como pago?</summary><p>Pix, cartão de crédito ou boleto, todo mês ou uma vez por ano.</p></details>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="final">
+        <h2>Comece hoje a ver o seu lucro de verdade</h2>
+        <p>Grátis, sem cadastro e sem cartão.</p>
+        <a class="btn mark" href="index.html">Abrir o RodaLucro</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">RodaLucro · feito para motoristas de aplicativo. Não tem ligação com Uber, 99 ou inDrive.</div>
+</footer>
+
+<script>
+(function () {
+  // Coloque aqui o seu WhatsApp com DDI e DDD (só números, ex.: '5511999999999')
+  // para o botão "Quero o Pro" abrir uma conversa com você.
+  const WHATSAPP = '';
+  const PRICES = { mes: { v: 'R$ 14,90', u: '/mês', note: 'Menos que um almoço por mês.' }, ano: { v: 'R$ 119', u: '/ano', note: 'Sai por R$ 9,92 por mês.' } };
+  let plano = 'mes';
+  const $ = (id) => document.getElementById(id);
+  function render() {
+    const p = PRICES[plano];
+    $('price-v').textContent = p.v; $('price-u').textContent = p.u; $('price-note').textContent = p.note;
+    $('b-mes').setAttribute('aria-pressed', plano === 'mes'); $('b-ano').setAttribute('aria-pressed', plano === 'ano');
+    if (WHATSAPP) {
+      const msg = 'Olá! Quero assinar o RodaLucro Pro (' + (plano === 'mes' ? 'mensal, ' + p.v : 'anual, ' + p.v) + ').';
+      $('cta-pro').href = 'https://wa.me/' + WHATSAPP + '?text=' + encodeURIComponent(msg);
+      $('cta-pro').target = '_blank'; $('cta-pro').rel = 'noopener';
+      $('em-breve').textContent = 'Você será atendido pelo WhatsApp para ativar o plano.';
+    }
+  }
+  $('b-mes').addEventListener('click', () => { plano = 'mes'; render(); });
+  $('b-ano').addEventListener('click', () => { plano = 'ano'; render(); });
+  render();
+})();
+</script>
+</body>
+</html>

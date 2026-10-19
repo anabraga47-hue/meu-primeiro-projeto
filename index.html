@@ -177,6 +177,23 @@ button.x { padding: 4px 9px; font-size: 1rem; line-height: 1; color: var(--muted
 .fuelcalc b { font-family: var(--font-num); }
 .xtotal { display: flex; justify-content: space-between; align-items: baseline; font-weight: 800; font-size: 1.05rem; border-top: 2px solid var(--ink); padding-top: 10px; }
 
+.day-nav, .month-nav { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.day-nav h2 { text-align: center; text-transform: none; }
+a.btn { display: flex; align-items: center; justify-content: center; text-align: center; text-decoration: none; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); padding: 11px 14px; font-weight: 700; }
+a.btn:focus-visible, a.promo:focus-visible { outline: 3px solid var(--mark); outline-offset: 1px; }
+.list li[data-edit] { cursor: pointer; }
+.list li[data-edit]:hover .desc { color: var(--ink); }
+textarea { font: inherit; font-size: max(16px, 1rem); color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; width: 100%; min-width: 0; resize: vertical; }
+input[type="file"] { padding: 6px 0; border: 0; background: transparent; font-size: 0.82rem; }
+a.promo { text-decoration: none; color: var(--ink); border: 2px solid var(--sign); gap: 4px; }
+a.promo .label { color: var(--sign); }
+.callout.warn { border-color: var(--warn); }
+.callout.bad { border-color: var(--bad); }
+.callout b.state { font-family: var(--font-display); font-size: 1rem; }
+.callout.warn b.state { color: var(--warn); }
+.callout.bad b.state { color: var(--bad); }
+.callout.good b.state { color: var(--good); }
+
 /* Calculadora */
 .verdict { border-radius: 10px; padding: 14px; display: flex; flex-direction: column; gap: 4px; border: 2px solid currentColor; }
 .verdict strong { font-family: var(--font-display); font-weight: 900; font-size: 1.4rem; }
@@ -309,9 +326,25 @@ nav.tabs button[aria-current="page"] { color: var(--sign); }
       <div class="muted" id="week-sum"></div>
     </div>
 
+    <div class="card" id="maint-card">
+      <h2>Manutenção</h2>
+      <div class="kv" id="mt-kv"></div>
+      <div class="callout" id="mt-oleo"></div>
+    </div>
+
     <div class="card">
-      <h2>Lançamentos de hoje</h2>
+      <div class="day-nav">
+        <button type="button" class="small" id="d-prev" aria-label="Dia anterior">‹</button>
+        <h2 id="d-title">Lançamentos de hoje</h2>
+        <button type="button" class="small" id="d-next" aria-label="Próximo dia">›</button>
+      </div>
+      <div class="muted" id="d-sum"></div>
       <ul class="list" id="today-list"></ul>
+      <p class="muted">Toque num lançamento para corrigir ou apagar.</p>
+      <div class="row">
+        <a class="btn" id="wa-day" href="#" target="_blank" rel="noopener">Enviar no WhatsApp</a>
+        <button type="button" id="btn-copy-day">Copiar resumo</button>
+      </div>
     </div>
   </section>
 
@@ -427,6 +460,14 @@ nav.tabs button[aria-current="page"] { color: var(--sign); }
       <h2>Combustível</h2>
       <div class="kv" id="r-fuel"></div>
     </div>
+
+    <div class="card">
+      <h2>Compartilhar o mês</h2>
+      <div class="row">
+        <a class="btn" id="wa-month" href="#" target="_blank" rel="noopener">Enviar no WhatsApp</a>
+        <button type="button" id="btn-copy-month">Copiar resumo</button>
+      </div>
+    </div>
   </section>
 
   <!-- AJUSTES -->
@@ -454,6 +495,12 @@ nav.tabs button[aria-current="page"] { color: var(--sign); }
         <span class="hint" id="comb-hint"></span>
       </div>
       <div class="callout" id="s-real" hidden></div>
+      <h2>Manutenção</h2>
+      <div class="row3">
+        <div class="field"><label for="s-res">Reserva por km (R$)</label><input id="s-res" inputmode="decimal"><span class="hint">Para óleo, pneu e revisão</span></div>
+        <div class="field"><label for="s-oleoint">Trocar óleo a cada (km)</label><input id="s-oleoint" inputmode="numeric"></div>
+        <div class="field"><label for="s-oleoult">Km da última troca</label><input id="s-oleoult" inputmode="numeric" placeholder="opcional"></div>
+      </div>
       <button class="primary" type="submit">Salvar ajustes</button>
     </form>
 
@@ -475,8 +522,21 @@ nav.tabs button[aria-current="page"] { color: var(--sign); }
     </div>
 
     <div class="card">
-      <h2>Dados</h2>
-      <p class="muted">Neste protótipo os dados ficam salvos só neste aparelho.</p>
+      <h2>Dados e backup</h2>
+      <p class="muted">Os dados ficam salvos só neste aparelho. Faça um backup antes de trocar de celular ou limpar o navegador.</p>
+      <div class="row">
+        <button type="button" id="btn-bk-file">Baixar backup</button>
+        <button type="button" id="btn-bk-copy">Copiar backup</button>
+      </div>
+      <div class="field"><label for="bk-text">Restaurar backup</label>
+        <textarea id="bk-text" rows="3" placeholder="Cole aqui o texto do backup"></textarea>
+        <span class="hint">Ou escolha o arquivo: <input type="file" id="bk-file" accept=".json,application/json,text/plain"></span>
+      </div>
+      <button type="button" id="btn-bk-restore">Restaurar</button>
+      <div class="row" id="bk-confirm" hidden>
+        <button type="button" class="danger" id="btn-bk-yes">Substituir meus dados</button>
+        <button type="button" id="btn-bk-no">Cancelar</button>
+      </div>
       <div class="row">
         <button type="button" id="btn-sample">Carregar exemplo</button>
         <button type="button" class="danger" id="btn-wipe">Apagar tudo</button>
@@ -486,6 +546,12 @@ nav.tabs button[aria-current="page"] { color: var(--sign); }
         <button type="button" id="btn-wipe-no">Cancelar</button>
       </div>
     </div>
+
+    <a class="card promo" href="planos.html">
+      <span class="label">RodaLucro Pro</span>
+      <b>Seus dados na nuvem, relatórios completos e muito mais</b>
+      <span class="muted">Conheça os planos →</span>
+    </a>
   </section>
 </main>
 
@@ -524,7 +590,7 @@ nav.tabs button[aria-current="page"] { color: var(--sign); }
     s10: { nome: 'Diesel S10', preco: 6.80, faixa: 'de R$ 6,71 a R$ 6,89', un: 'L', kml: 12 },
     gnv: { nome: 'GNV', preco: 4.30, faixa: 'de R$ 3,89 a R$ 4,74', un: 'm³', kml: 13 },
   };
-  const DEFAULTS = { meta: 300, metaSemana: 1500, metaMes: 6000, min: 1.8, kml: 11, preco: 6.36, combTipo: 'gasolina', tema: 'auto', letra: 'normal', ultimoApp: 'Uber', modoComb: 'abast' };
+  const DEFAULTS = { meta: 300, metaSemana: 1500, metaMes: 6000, min: 1.8, kml: 11, preco: 6.36, combTipo: 'gasolina', tema: 'auto', letra: 'normal', ultimoApp: 'Uber', modoComb: 'abast', res: 0.12, oleoInt: 5000, oleoUlt: null, oleoData: null };
   const APPS = ['Uber', '99', 'inDrive', 'Particular', 'Outro'];
   const FUEL = 'Combustível';
   const CATS = [FUEL, 'Alimentação', 'Lavagem', 'Pedágio', 'Estacionamento', 'Manutenção', 'Aluguel do carro', 'Celular / internet', 'Outros'];
@@ -607,7 +673,7 @@ nav.tabs button[aria-current="page"] { color: var(--sign); }
     hoje.forEach(([v, app, km]) => e.push({ id: uid(), date: dayKey(), type: 'ganho', app, valor: v, corridas: 1, km, horas: 0 }));
     e.push({ id: uid(), date: dayKey(), type: 'abast', valor: 100, litros: 15.9, odo });
     e.push({ id: uid(), date: dayKey(), type: 'gasto', cat: 'Alimentação', valor: 14, nota: 'café' });
-    return { settings: { ...DEFAULTS }, entries: e, shift: { start: t0, odo }, sample: true };
+    return { settings: { ...DEFAULTS, oleoUlt: 83100, oleoData: day(-31) }, entries: e, shift: { start: t0, odo }, sample: true, onboarded: true };
   }
 
   // ---------- cálculos ----------
@@ -769,10 +835,100 @@ nav.tabs button[aria-current="page"] { color: var(--sign); }
     const hit = days.filter((x) => x.t.lucro >= s.meta).length;
     $('week-sum').innerHTML = 'Lucro em 7 dias: <b>' + brl(tot) + '</b> · meta do dia batida em <b>' + hit + '</b> de 7';
 
-    // lista do dia
+    renderDay();
+    renderMaint();
+  }
+
+  // ---------- histórico por dia ----------
+  let viewDay = dayKey();
+  const shortDate = (key) => new Date(key + 'T12:00').toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: '2-digit' }).replace('.', '');
+  function renderDay() {
+    const today = dayKey();
+    if (viewDay > today) viewDay = today;
+    const t = dayStats(viewDay);
+    $('d-title').textContent = viewDay === today ? 'Lançamentos de hoje' : 'Lançamentos de ' + shortDate(viewDay);
+    $('d-next').disabled = viewDay === today;
+    $('d-sum').innerHTML = t.list.length
+      ? 'Lucro <b>' + brl(t.lucro) + '</b> · ' + t.corridas + ' corridas · ' + dec(t.km, 0) + ' km' + (t.horas > 0.05 ? ' · ' + hm(t.horas) : '')
+      : '';
     const ul = $('today-list');
-    if (!t.list.length) { ul.innerHTML = '<li class="empty">Nada lançado hoje. Toque em <b>+ Corrida</b> ao terminar cada corrida.</li>'; return; }
-    ul.innerHTML = t.list.slice().reverse().map(itemHtml).join('');
+    ul.innerHTML = t.list.length
+      ? t.list.slice().reverse().map(itemHtml).join('')
+      : '<li class="empty">' + (viewDay === today ? 'Nada lançado hoje. Toque em <b>+ Corrida</b> ao terminar cada corrida.' : 'Nada lançado neste dia.') + '</li>';
+    const txt = dayText(viewDay);
+    $('wa-day').href = 'https://wa.me/?text=' + encodeURIComponent(txt);
+  }
+
+  // ---------- manutenção ----------
+  // km atual do painel: o maior registrado, ou a última troca + km rodados desde então
+  function currentOdo() {
+    let odo = 0;
+    state.entries.forEach((e) => { if (e.odo > odo) odo = e.odo; if (e.odoEnd > odo) odo = e.odoEnd; });
+    if (state.shift && state.shift.odo > odo) odo = state.shift.odo;
+    const s = state.settings;
+    if (s.oleoUlt && s.oleoData) {
+      let km = 0;
+      Object.keys(IDX).forEach((k) => { if (k > s.oleoData) km += dayStats(k).km; });
+      odo = Math.max(odo, s.oleoUlt + km);
+    }
+    return odo || null;
+  }
+  function oilStatus() {
+    const s = state.settings;
+    if (!s.oleoUlt) return null;
+    const odo = currentOdo() || s.oleoUlt;
+    const prox = s.oleoUlt + s.oleoInt, falta = prox - odo;
+    return { prox, falta, odo, cls: falta <= 0 ? 'bad' : falta <= 500 ? 'warn' : 'good' };
+  }
+  function renderMaint() {
+    const s = state.settings, t = dayStats(dayKey());
+    const now = new Date(), mo = sumStats(monthKeys(now.getFullYear(), now.getMonth(), true));
+    $('mt-kv').innerHTML = cell('Guarde hoje', brl(t.km * s.res)) + cell('Reserva do mês', brl(mo.km * s.res));
+    const o = oilStatus(), box = $('mt-oleo');
+    box.className = 'callout' + (o ? ' ' + o.cls : '');
+    if (!o) {
+      box.innerHTML = '<span>Informe o km da última troca de óleo para receber o aviso da próxima.</span><button type="button" class="small" data-oil>Registrar troca de óleo</button>';
+    } else if (o.falta <= 0) {
+      box.innerHTML = '<b class="state">Troca de óleo atrasada</b><span>Passou ' + dec(-o.falta, 0) + ' km da troca (era no painel ' + dec(o.prox, 0) + ').</span><button type="button" class="small" data-oil>Já troquei o óleo</button>';
+    } else {
+      box.innerHTML = '<b class="state">' + (o.cls === 'warn' ? 'Troca de óleo chegando' : 'Óleo em dia') + '</b><span>Próxima troca em ≈ ' + dec(o.falta, 0) + ' km, com o painel em ' + dec(o.prox, 0) + ' km.</span><button type="button" class="small" data-oil>Registrar troca de óleo</button>';
+    }
+  }
+
+  // ---------- resumos para WhatsApp ----------
+  function dayText(key) {
+    const s = state.settings, t = dayStats(key);
+    const falta = s.meta - t.lucro;
+    return ['🚗 *RodaLucro* · ' + shortDate(key),
+      'Faturamento: ' + brl(t.bruto),
+      'Combustível: ' + brl(t.comb),
+      'Outros gastos: ' + brl(t.gastos),
+      '*Lucro líquido: ' + brl(t.lucro) + '*',
+      t.corridas + ' corridas · ' + dec(t.km, 0) + ' km' + (t.horas > 0.05 ? ' · ' + hm(t.horas) + ' · ' + brl(t.lucro / t.horas) + '/hora' : ''),
+      falta <= 0 ? '✅ Meta do dia (' + brl0(s.meta) + ') batida!' : '🎯 Meta ' + brl0(s.meta) + ': faltaram ' + brl(falta)].join('\n');
+  }
+  function monthText() {
+    const s = state.settings, now = new Date();
+    const isCurrent = rep.y === now.getFullYear() && rep.m === now.getMonth();
+    const mo = sumStats(monthKeys(rep.y, rep.m, isCurrent));
+    const title = new Date(rep.y, rep.m, 1).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+    const apps = Object.entries(mo.apps).sort((a, b) => b[1].bruto - a[1].bruto).map(([a, v]) => '• ' + a + ': ' + brl(v.bruto) + ' (' + v.corridas + ' corridas)');
+    return ['🚗 *RodaLucro* · ' + title,
+      'Faturamento: ' + brl(mo.bruto),
+      'Combustível: ' + brl(mo.comb),
+      'Outros gastos: ' + brl(mo.gastos),
+      '*Lucro líquido: ' + brl(mo.lucro) + '*',
+      mo.dias + ' dias · ' + mo.corridas + ' corridas · ' + dec(mo.km, 0) + ' km · ' + hm(mo.horas),
+      mo.dias ? 'Média por dia: ' + brl(mo.lucro / mo.dias) : '',
+      apps.length ? 'Por app:\n' + apps.join('\n') : '',
+      mo.lucro >= s.metaMes ? '✅ Meta do mês (' + brl0(s.metaMes) + ') batida!' : '🎯 Meta do mês ' + brl0(s.metaMes) + ': faltam ' + brl(s.metaMes - mo.lucro)].filter(Boolean).join('\n');
+  }
+  function copyText(text, okMsg) {
+    const fallback = () => openSheet('texto', text);
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(() => toast(okMsg), fallback);
+      else fallback();
+    } catch (e) { fallback(); }
   }
   function goalSub(falta, diasRestantes) {
     if (falta <= 0) return 'Meta batida! Passou <b>' + brl(-falta) + '</b>.';
@@ -781,14 +937,15 @@ nav.tabs button[aria-current="page"] { color: var(--sign); }
     return 'Faltam <b>' + brl(falta) + '</b>' + (r.n ? ' (≈ ' + r.n + ' corridas)' : '') + ' · ' + brl(porDia) + ' por dia até o fim';
   }
   function itemHtml(e) {
-    const del = '<button class="x" type="button" data-del="' + e.id + '" aria-label="Apagar">×</button>';
+    const li = '<li data-edit="' + e.id + '" tabindex="0" role="button" aria-label="Editar lançamento">';
+    const pen = '<span class="x" aria-hidden="true">✎</span>';
     if (e.type === 'ganho') {
       const d = [e.corridas ? e.corridas + (e.corridas > 1 ? ' corridas' : ' corrida') : '', e.km ? dec(e.km, 0) + ' km' : '', e.horas ? hm(e.horas) : ''].filter(Boolean).join(' · ');
-      return '<li><span class="chip in">' + esc(e.app) + '</span><span class="desc">' + d + '</span><span class="amt num">' + brl(e.valor) + '</span>' + del + '</li>';
+      return li + '<span class="chip in">' + esc(e.app) + '</span><span class="desc">' + d + '</span><span class="amt num">' + brl(e.valor) + '</span>' + pen + '</li>';
     }
-    if (e.type === 'gasto') return '<li><span class="chip out">' + esc(e.cat) + '</span><span class="desc">' + esc(e.nota || '') + '</span><span class="amt num">−' + brl(e.valor) + '</span>' + del + '</li>';
-    if (e.type === 'jornada') return '<li><span class="chip info">Jornada</span><span class="desc">' + clock(e.start) + '–' + clock(e.end) + (e.km ? ' · ' + dec(e.km, 0) + ' km no painel' : '') + '</span><span class="amt num">' + hm(e.horas) + '</span>' + del + '</li>';
-    if (e.type === 'abast') return '<li><span class="chip out">' + FUEL + '</span><span class="desc">' + (e.litros ? dec(e.litros) + ' ' + fuelUn() + ' · rende ≈ ' + dec(e.litros * state.settings.kml, 0) + ' km' : '') + (e.odo ? ' · painel ' + dec(e.odo, 0) : '') + '</span><span class="amt num">−' + brl(e.valor) + '</span>' + del + '</li>';
+    if (e.type === 'gasto') return li + '<span class="chip out">' + esc(e.cat) + '</span><span class="desc">' + esc(e.nota || '') + '</span><span class="amt num">−' + brl(e.valor) + '</span>' + pen + '</li>';
+    if (e.type === 'jornada') return li + '<span class="chip info">Jornada</span><span class="desc">' + (e.start ? clock(e.start) + '–' + clock(e.end) : '') + (e.km ? ' · ' + dec(e.km, 0) + ' km no painel' : '') + '</span><span class="amt num">' + hm(e.horas) + '</span>' + pen + '</li>';
+    if (e.type === 'abast') return li + '<span class="chip out">' + FUEL + '</span><span class="desc">' + (e.litros ? dec(e.litros) + ' ' + fuelUn() + ' · rende ≈ ' + dec(e.litros * state.settings.kml, 0) + ' km' : '') + (e.odo ? ' · painel ' + dec(e.odo, 0) : '') + '</span><span class="amt num">−' + brl(e.valor) + '</span>' + pen + '</li>';
     return '';
   }
 
@@ -804,6 +961,7 @@ nav.tabs button[aria-current="page"] { color: var(--sign); }
     $('s-meta').value = dec(s.meta, 2); $('s-metasem').value = dec(s.metaSemana, 2); $('s-metames').value = dec(s.metaMes, 2);
     $('s-min').value = dec(s.min, 2); $('s-kml').value = dec(s.kml, 1); $('s-preco').value = dec(s.preco, 2);
     $('s-tipo').value = s.combTipo; tipoLabels(s.combTipo);
+    $('s-res').value = dec(s.res, 2); $('s-oleoint').value = dec(s.oleoInt, 0); $('s-oleoult').value = s.oleoUlt ? dec(s.oleoUlt, 0) : '';
     previewAjustes();
     const r = realKml(), box = $('s-real');
     if (r) {
@@ -956,7 +1114,8 @@ nav.tabs button[aria-current="page"] { color: var(--sign); }
       tile('Faturamento', brl(mo.bruto)) + tile('Dias rodados', String(mo.dias)) + tile('Média por dia', mo.dias ? brl(mo.lucro / mo.dias) : '—') +
       tile('Corridas', String(mo.corridas)) + tile('Km', dec(mo.km, 0)) + tile('Horas', hm(mo.horas)) +
       tile('Lucro / hora', mo.horas ? brl(mo.lucro / mo.horas) : '—') + tile('Lucro / km', mo.km ? brl(mo.lucro / mo.km) : '—') +
-      tile('Melhor dia', mo.best ? new Date(mo.best.key + 'T12:00').toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }) + ' · ' + brl0(mo.best.lucro) : '—');
+      tile('Melhor dia', mo.best ? new Date(mo.best.key + 'T12:00').toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }) + ' · ' + brl0(mo.best.lucro) : '—') +
+      tile('Reserva manutenção', brl(mo.km * s.res)) + tile('Abastecimentos', brl(mo.abast)) + tile('Gastos extras', brl(mo.gastos));
 
     const apps = Object.entries(mo.apps).sort((a, b) => b[1].bruto - a[1].bruto);
     const maxApp = apps.length ? apps[0][1].bruto : 1;
@@ -969,7 +1128,10 @@ nav.tabs button[aria-current="page"] { color: var(--sign); }
     $('r-table').innerHTML = '<tr><td>Faturamento bruto</td><td>' + brl(mo.bruto) + '</td></tr>' +
       '<tr><td>' + (s.modoComb === 'km' ? 'Combustível (pelos km)' : 'Combustível') + '</td><td>−' + brl(mo.comb) + '</td></tr>' +
       cats.map(([c, v]) => '<tr><td>' + esc(c) + '</td><td>−' + brl(v) + '</td></tr>').join('') +
-      '<tr class="total"><td>Lucro líquido</td><td>' + brl(mo.lucro) + '</td></tr>';
+      '<tr class="total"><td>Lucro líquido</td><td>' + brl(mo.lucro) + '</td></tr>' +
+      '<tr><td>Guardar para manutenção (' + brl(s.res) + '/km)</td><td>−' + brl(mo.km * s.res) + '</td></tr>' +
+      '<tr class="total"><td>Livre para gastar</td><td>' + brl(mo.lucro - mo.km * s.res) + '</td></tr>';
+    $('wa-month').href = 'https://wa.me/?text=' + encodeURIComponent(monthText());
 
     const rk = realKml();
     $('r-fuel').innerHTML = cell('Abastecimentos', brl(mo.abast)) + cell('Litros', dec(mo.litros) + ' L') +
@@ -1004,11 +1166,66 @@ nav.tabs button[aria-current="page"] { color: var(--sign); }
   function addEntry(e) { leaveSample(); state.entries.push({ id: uid(), ...e }); save(); renderAll(); }
 
   // folha inferior: corrida rápida e jornada
-  let sheetMode = null;
-  function openSheet(mode) {
-    sheetMode = mode;
+  let sheetMode = null, sheetArg = null;
+  const fld = (id, label, value, opts = {}) =>
+    '<div class="field"><label for="' + id + '">' + label + '</label><input id="' + id + '" inputmode="' + (opts.mode || 'decimal') + '"' +
+    (opts.type ? ' type="' + opts.type + '"' : '') + ' value="' + (value == null ? '' : esc(value)) + '"' + (opts.ph ? ' placeholder="' + opts.ph + '"' : '') + '>' +
+    (opts.hint ? '<span class="hint">' + opts.hint + '</span>' : '') + '</div>';
+  const sel = (id, label, list, value) => '<div class="field"><label for="' + id + '">' + label + '</label><select id="' + id + '">' +
+    list.map((o) => '<option' + (o === value ? ' selected' : '') + '>' + esc(o) + '</option>').join('') + '</select></div>';
+  const v2 = (n, d = 2) => (n > 0 ? dec(n, d) : '');
+
+  function openSheet(mode, arg) {
+    sheetMode = mode; sheetArg = arg;
     const body = $('sheet-body');
-    if (mode === 'corrida') {
+    $('sheet-cancel').textContent = 'Cancelar';
+    $('sheet-ok').hidden = false;
+    if (mode === 'edit') {
+      const e = state.entries.find((x) => x.id === arg);
+      if (!e) return;
+      $('sheet-title').textContent = 'Corrigir lançamento';
+      const date = fld('e-date', 'Dia', e.date, { type: 'date', mode: 'none' });
+      if (e.type === 'ganho') {
+        body.innerHTML = '<div class="row">' + sel('e-app', 'App', APPS, e.app) + date + '</div>' +
+          '<div class="row">' + fld('e-valor', 'Valor recebido (R$)', v2(e.valor)) + fld('e-corridas', 'Corridas', e.corridas || '', { mode: 'numeric' }) + '</div>' +
+          '<div class="row">' + fld('e-km', 'Km', v2(e.km, 1)) + fld('e-horas', 'Horas', v2(e.horas, 2)) + '</div>';
+      } else if (e.type === 'gasto') {
+        body.innerHTML = '<div class="row">' + sel('e-cat', 'Categoria', CATS.filter((c) => c !== FUEL), e.cat) + date + '</div>' +
+          '<div class="row">' + fld('e-valor', 'Valor (R$)', v2(e.valor)) + fld('e-nota', 'Observação', e.nota || '', { mode: 'text' }) + '</div>';
+      } else if (e.type === 'abast') {
+        body.innerHTML = '<div class="row">' + fld('e-valor', 'Valor pago (R$)', v2(e.valor)) + date + '</div>' +
+          '<div class="row">' + fld('e-litros', 'Litros', v2(e.litros)) + fld('e-odo', 'Km do painel', v2(e.odo, 0), { mode: 'numeric' }) + '</div>';
+      } else if (e.type === 'jornada') {
+        body.innerHTML = '<div class="row">' + fld('e-horas', 'Horas trabalhadas', v2(e.horas)) + date + '</div>' + fld('e-km', 'Km rodados (painel)', v2(e.km, 0), { mode: 'numeric' });
+      }
+      body.innerHTML += '<button type="button" class="danger" id="e-del">Apagar lançamento</button>' +
+        '<div class="row" id="e-del-confirm" hidden><button type="button" class="danger" id="e-del-yes">Sim, apagar</button><button type="button" id="e-del-no">Não</button></div>';
+      $('e-del').onclick = () => { $('e-del-confirm').hidden = false; $('e-del').hidden = true; };
+      $('e-del-no').onclick = () => { $('e-del-confirm').hidden = true; $('e-del').hidden = false; };
+      $('e-del-yes').onclick = () => { state.entries = state.entries.filter((x) => x.id !== arg); save(); closeSheet(); renderAll(); toast('Lançamento apagado'); };
+      $('sheet-ok').textContent = 'Salvar correção';
+    } else if (mode === 'onboard') {
+      const s = state.settings;
+      $('sheet-title').textContent = 'Bem-vindo ao RodaLucro! 👋';
+      body.innerHTML = '<p class="muted">Configure em 30 segundos. Dá para mudar tudo depois em Ajustes.</p>' +
+        '<div class="field"><label for="o-tipo">Combustível que você usa</label><select id="o-tipo">' +
+        Object.entries(COMBS).map(([k, c]) => '<option value="' + k + '"' + (k === s.combTipo ? ' selected' : '') + '>' + c.nome + '</option>').join('') + '</select></div>' +
+        '<div class="row">' + fld('o-preco', 'Preço que você paga (R$)', dec(s.preco, 2)) + fld('o-kml', 'Seu carro faz (km/l)', dec(s.kml, 1)) + '</div>' +
+        fld('o-meta', 'Quanto quer lucrar por dia (R$)', dec(s.meta, 0), { hint: 'A meta da semana e do mês são calculadas a partir dela.' });
+      $('o-tipo').onchange = () => { const c = COMBS[$('o-tipo').value]; $('o-preco').value = dec(c.preco, 2); $('o-kml').value = dec(c.kml, 1); $('o-kml').previousElementSibling.textContent = 'Seu carro faz (km/' + (c.un === 'm³' ? 'm³' : 'l') + ')'; };
+      $('sheet-ok').textContent = 'Começar';
+      $('sheet-cancel').textContent = 'Ver um exemplo';
+    } else if (mode === 'oleo') {
+      $('sheet-title').textContent = 'Troca de óleo';
+      body.innerHTML = fld('o-odo', 'Km do painel na troca', v2(currentOdo(), 0), { mode: 'numeric', ph: '84.520' }) +
+        fld('o-valor', 'Quanto pagou (opcional)', '', { ph: '180,00', hint: 'Entra como gasto de Manutenção no dia de hoje.' });
+      $('sheet-ok').textContent = 'Salvar troca';
+    } else if (mode === 'texto') {
+      $('sheet-title').textContent = 'Copie o texto';
+      body.innerHTML = '<p class="muted">Selecione o texto abaixo e copie.</p><textarea id="t-text" rows="10" readonly>' + esc(arg) + '</textarea>';
+      $('sheet-ok').hidden = true; $('sheet-cancel').textContent = 'Fechar';
+      setTimeout(() => { const ta = $('t-text'); ta.focus(); ta.select(); }, 80);
+    } else if (mode === 'corrida') {
       $('sheet-title').textContent = 'Nova corrida';
       const last = state.settings.ultimoApp;
       body.innerHTML =
@@ -1036,13 +1253,43 @@ nav.tabs button[aria-current="page"] { color: var(--sign); }
     setTimeout(() => { const f = body.querySelector('input'); if (f) f.focus(); }, 60);
   }
   function closeSheet() { $('backdrop').hidden = true; $('sheet').hidden = true; sheetMode = null; }
-  $('sheet-cancel').addEventListener('click', closeSheet);
-  $('backdrop').addEventListener('click', closeSheet);
-  document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape' && sheetMode) closeSheet(); });
+  function dismissSheet() {
+    // fechar a boas-vindas sem configurar mostra o exemplo
+    if (sheetMode === 'onboard') { const keep = state.settings; state = sampleState(); state.settings.tema = keep.tema; state.settings.letra = keep.letra; state.onboarded = true; save(); closeSheet(); renderAll(); toast('Este é um exemplo. Toque em Começar do zero quando quiser.'); return; }
+    closeSheet();
+  }
+  $('sheet-cancel').addEventListener('click', dismissSheet);
+  $('backdrop').addEventListener('click', dismissSheet);
+  document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape' && sheetMode) dismissSheet(); });
 
   $('sheet-form').addEventListener('submit', (ev) => {
     ev.preventDefault();
-    if (sheetMode === 'corrida') {
+    if (sheetMode === 'edit') {
+      const e = state.entries.find((x) => x.id === sheetArg);
+      if (!e) return closeSheet();
+      const n = (id) => (document.getElementById(id) ? num($(id).value) : NaN);
+      const valor = n('e-valor');
+      if (e.type !== 'jornada' && !(valor > 0)) { toast('O valor precisa ser maior que zero'); return; }
+      e.date = $('e-date').value || e.date;
+      if (e.type === 'ganho') Object.assign(e, { app: $('e-app').value, valor, corridas: Math.max(0, Math.round(n('e-corridas') || 0)), km: n('e-km') || 0, horas: n('e-horas') || 0 });
+      else if (e.type === 'gasto') Object.assign(e, { cat: $('e-cat').value, valor, nota: $('e-nota').value.trim() });
+      else if (e.type === 'abast') Object.assign(e, { valor, litros: n('e-litros') > 0 ? n('e-litros') : null, odo: n('e-odo') > 0 ? n('e-odo') : null });
+      else if (e.type === 'jornada') { const h = n('e-horas'); if (!(h > 0)) { toast('Informe as horas'); return; } Object.assign(e, { horas: h, km: n('e-km') || 0 }); }
+      save(); closeSheet(); renderAll(); toast('Lançamento corrigido');
+    } else if (sheetMode === 'onboard') {
+      const tipo = $('o-tipo').value, preco = num($('o-preco').value), kml = num($('o-kml').value), meta = num($('o-meta').value);
+      if (!(preco > 0 && kml > 0 && meta > 0)) { toast('Preencha os três campos'); return; }
+      Object.assign(state.settings, { combTipo: tipo, preco, kml, meta, metaSemana: Math.round(meta * 6), metaMes: Math.round(meta * 25) });
+      state.entries = []; state.shift = null; state.sample = false; state.onboarded = true;
+      save(); closeSheet(); renderAll(); go('hoje'); toast('Tudo pronto! Toque em Iniciar dia quando começar a rodar');
+    } else if (sheetMode === 'oleo') {
+      const odo = num($('o-odo').value), valor = num($('o-valor').value);
+      if (!(odo > 0)) { toast('Informe o km do painel'); return; }
+      leaveSample();
+      state.settings.oleoUlt = odo; state.settings.oleoData = dayKey();
+      if (valor > 0) state.entries.push({ id: uid(), date: dayKey(), type: 'gasto', cat: 'Manutenção', valor, nota: 'troca de óleo' });
+      save(); closeSheet(); renderAll(); toast('Troca registrada · próxima com ' + dec(odo + state.settings.oleoInt, 0) + ' km');
+    } else if (sheetMode === 'corrida') {
       const valor = num($('q-valor').value);
       if (!(valor > 0)) { toast('Digite quanto recebeu na corrida'); $('q-valor').focus(); return; }
       const app = ($('q-apps').querySelector('[aria-pressed="true"]') || {}).dataset?.app || 'Uber';
@@ -1060,7 +1307,7 @@ nav.tabs button[aria-current="page"] { color: var(--sign); }
     } else if (sheetMode === 'encerrar') {
       const sh = state.shift, end = Date.now(), odo = num($('q-odo').value);
       const km = sh.odo && odo > sh.odo ? Math.round(odo - sh.odo) : 0;
-      state.entries.push({ id: uid(), date: dayKey(new Date(sh.start)), type: 'jornada', start: sh.start, end, horas: +((end - sh.start) / 3.6e6).toFixed(2), km });
+      state.entries.push({ id: uid(), date: dayKey(new Date(sh.start)), type: 'jornada', start: sh.start, end, horas: +((end - sh.start) / 3.6e6).toFixed(2), km, odoEnd: odo > 0 ? odo : null });
       state.shift = null; save(); closeSheet(); renderAll();
       const t = dayStats(dayKey());
       toast('Dia encerrado · ' + hm(t.horas) + ' · lucro ' + brl(t.lucro));
@@ -1105,13 +1352,51 @@ nav.tabs button[aria-current="page"] { color: var(--sign); }
   });
 
   function onListClick(ev) {
-    const id = ev.target.closest('[data-del]')?.dataset.del;
-    if (!id) return;
-    state.entries = state.entries.filter((e) => e.id !== id);
-    save(); renderAll(); toast('Lançamento apagado');
+    const id = ev.target.closest('[data-edit]')?.dataset.edit;
+    if (id) openSheet('edit', id);
   }
-  $('today-list').addEventListener('click', onListClick);
-  $('abast-list').addEventListener('click', onListClick);
+  function onListKey(ev) { if ((ev.key === 'Enter' || ev.key === ' ') && ev.target.matches('[data-edit]')) { ev.preventDefault(); openSheet('edit', ev.target.dataset.edit); } }
+  ['today-list', 'abast-list'].forEach((id) => { $(id).addEventListener('click', onListClick); $(id).addEventListener('keydown', onListKey); });
+  $('d-prev').addEventListener('click', () => { viewDay = dayKey(addDays(-1, new Date(viewDay + 'T12:00'))); renderDay(); });
+  $('d-next').addEventListener('click', () => { viewDay = dayKey(addDays(1, new Date(viewDay + 'T12:00'))); renderDay(); });
+  $('btn-copy-day').addEventListener('click', () => copyText(dayText(viewDay), 'Resumo do dia copiado'));
+  $('btn-copy-month').addEventListener('click', () => copyText(monthText(), 'Resumo do mês copiado'));
+  $('maint-card').addEventListener('click', (ev) => { if (ev.target.closest('[data-oil]')) openSheet('oleo'); });
+
+  // ---------- backup ----------
+  const backupJson = () => JSON.stringify({ app: 'RodaLucro', versao: 2, criadoEm: new Date().toISOString(), dados: state });
+  $('btn-bk-file').addEventListener('click', () => {
+    try {
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([backupJson()], { type: 'application/json' }));
+      a.download = 'rodalucro-backup-' + dayKey() + '.json';
+      document.body.appendChild(a); a.click(); a.remove();
+      toast('Backup baixado');
+    } catch (e) { copyText(backupJson(), 'Backup copiado'); }
+  });
+  $('btn-bk-copy').addEventListener('click', () => copyText(backupJson(), 'Backup copiado. Guarde no WhatsApp ou no e-mail'));
+  $('bk-file').addEventListener('change', () => {
+    const f = $('bk-file').files[0]; if (!f) return;
+    const r = new FileReader(); r.onload = () => { $('bk-text').value = r.result; toast('Arquivo carregado. Toque em Restaurar'); }; r.readAsText(f);
+  });
+  let pendingRestore = null;
+  $('btn-bk-restore').addEventListener('click', () => {
+    try {
+      const obj = JSON.parse($('bk-text').value.trim());
+      const d = obj.dados || obj;
+      if (!d || !Array.isArray(d.entries) || typeof d.settings !== 'object') throw new Error();
+      pendingRestore = d;
+      $('bk-confirm').hidden = false;
+      toast('Backup com ' + d.entries.length + (d.entries.length === 1 ? ' lançamento' : ' lançamentos') + '. Confirme para substituir');
+    } catch (e) { toast('Esse texto não é um backup do RodaLucro'); }
+  });
+  $('btn-bk-no').addEventListener('click', () => { pendingRestore = null; $('bk-confirm').hidden = true; });
+  $('btn-bk-yes').addEventListener('click', () => {
+    if (!pendingRestore) return;
+    state = { ...pendingRestore, settings: { ...DEFAULTS, ...pendingRestore.settings }, shift: pendingRestore.shift || null, onboarded: true };
+    pendingRestore = null; $('bk-confirm').hidden = true; $('bk-text').value = '';
+    save(); renderAll(); go('hoje'); toast('Backup restaurado');
+  });
 
   $('f-ajustes').addEventListener('submit', (ev) => {
     ev.preventDefault();
@@ -1119,6 +1404,10 @@ nav.tabs button[aria-current="page"] { color: var(--sign); }
       min: num($('s-min').value), kml: num($('s-kml').value), preco: num($('s-preco').value) };
     if (Object.values(v).some((x) => !(x > 0))) { toast('Preencha todos os campos com valores maiores que zero'); return; }
     v.combTipo = $('s-tipo').value;
+    const res = num($('s-res').value), oi = num($('s-oleoint').value), ou = num($('s-oleoult').value);
+    if (!(res >= 0) || !(oi > 0)) { toast('Confira a reserva por km e o intervalo do óleo'); return; }
+    v.res = res; v.oleoInt = oi;
+    if (ou > 0 && ou !== state.settings.oleoUlt) { v.oleoUlt = ou; v.oleoData = dayKey(); } else if (!(ou > 0)) { v.oleoUlt = null; v.oleoData = null; }
     Object.assign(state.settings, v); save(); renderAll(); toast('Ajustes salvos');
   });
   $('s-tipo').innerHTML = Object.entries(COMBS).map(([k, c]) => '<option value="' + k + '">' + c.nome + ' · média ' + brl(c.preco) + '</option>').join('');
@@ -1151,7 +1440,7 @@ nav.tabs button[aria-current="page"] { color: var(--sign); }
   $('m-prev').addEventListener('click', () => { rep.m--; if (rep.m < 0) { rep.m = 11; rep.y--; } renderRelatorio(); });
   $('m-next').addEventListener('click', () => { rep.m++; if (rep.m > 11) { rep.m = 0; rep.y++; } renderRelatorio(); });
 
-  $('btn-clear-sample').addEventListener('click', () => { state.entries = []; state.shift = null; state.sample = false; save(); renderAll(); toast('Pronto! Toque em Iniciar dia para começar'); });
+  $('btn-clear-sample').addEventListener('click', () => { state.entries = []; state.shift = null; state.sample = false; state.settings.oleoUlt = null; state.settings.oleoData = null; save(); renderAll(); openSheet('onboard'); });
   $('btn-sample').addEventListener('click', () => { const keep = state.settings; state = sampleState(); state.settings.tema = keep.tema; state.settings.letra = keep.letra; save(); renderAll(); toast('Exemplo carregado'); go('hoje'); });
   $('btn-wipe').addEventListener('click', () => { $('wipe-confirm').hidden = false; });
   $('btn-wipe-no').addEventListener('click', () => { $('wipe-confirm').hidden = true; });
@@ -1161,7 +1450,9 @@ nav.tabs button[aria-current="page"] { color: var(--sign); }
   });
 
   // ---------- início ----------
-  state = load() || sampleState();
+  const saved = load();
+  state = saved || { settings: { ...DEFAULTS }, entries: [], shift: null, sample: false, onboarded: false };
+  if (saved && saved.onboarded === undefined) state.onboarded = true; // quem já usava a versão anterior
   state.settings = { ...DEFAULTS, ...(state.settings || {}) };
   state.entries = state.entries || [];
   state.shift = state.shift || null;
@@ -1171,6 +1462,7 @@ nav.tabs button[aria-current="page"] { color: var(--sign); }
   renderAll();
   const start = (location.hash || '').slice(1);
   go(['hoje', 'lancar', 'calcular', 'relatorio', 'ajustes'].includes(start) ? start : 'hoje');
+  if (!state.onboarded) openSheet('onboard');
 
   // atualiza o relógio da jornada
   setInterval(() => { if (state.shift) { renderShift(); renderHoje(); } }, 30000);
