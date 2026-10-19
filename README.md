@@ -5,6 +5,7 @@ Protótipo de app para motoristas de aplicativo (Uber, 99, inDrive) acompanharem
 ## O que já faz
 
 - **Planejar o dia:** ao abrir, escolhe os apps, o dia, a meta e os gastos (café, combustível, almoço…) e vê quanto precisa fazer: meta + gastos, em reais e em corridas.
+- **Cofrinho de emergência:** valor fixo guardado por dia (ex.: R$ 30), fora da meta. Entra na conta do Planejar o dia, tem botão "Guardei hoje", saldo acumulado e registro de retiradas.
 - **Hoje:** lucro líquido do dia, progresso da meta e quantas corridas faltam para batê-la (com tempo estimado).
 - **+ Corrida:** registra cada corrida em 2 toques (valor e app).
 - **Jornada:** botão "Iniciar dia / Encerrar dia" que conta as horas sozinho (e os km, se informar o painel).
