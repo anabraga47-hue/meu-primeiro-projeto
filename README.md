@@ -2,7 +2,18 @@
 
 Protótipo de app para motoristas de aplicativo (Uber, 99, inDrive) acompanharem quanto ganham de verdade.
 
-## O que já faz
+## Versão simples (tela inicial)
+
+Uma tela só, fácil de usar:
+
+1. **Data e meta do dia.**
+2. **Corridas:** escolhe o app (Uber, 99, inDrive, Outro), digita o valor e toca em Adicionar.
+3. **Gastos:** combustível, café da manhã, almoço, lavagem… com o valor.
+4. **Resumo:** ganhos, gastos, lucro e se bateu a meta ou quanto faltou. Dá para enviar no WhatsApp.
+5. **Seus dias:** cada dia fica guardado pela data, com o lucro e se bateu a meta. Tocando no dia, ele abre.
+
+## Versão completa (`completo.html`)
+
 
 - **Planejar o dia:** ao abrir, escolhe os apps, o dia, a meta e os gastos (café, combustível, almoço…) e vê quanto precisa fazer: meta + gastos, em reais e em corridas.
 - **Cofrinho de emergência:** valor fixo guardado por dia (ex.: R$ 30), fora da meta. Entra na conta do Planejar o dia, tem botão "Guardei hoje", saldo acumulado e registro de retiradas.
@@ -37,7 +48,8 @@ Para publicar de graça, ative o **GitHub Pages** (Settings → Pages → branch
 
 ## Arquivos
 
-- `index.html`: o app inteiro (telas, estilos e lógica)
+- `index.html`: versão simples (tela inicial)
+- `completo.html`: versão completa, com os mesmos dados
 - `planos.html`: página de vendas. Para o botão "Quero o Pro" abrir o seu WhatsApp, preencha `const WHATSAPP = ''` no fim do arquivo (ex.: `'5511999999999'`)
 - `manifest.webmanifest`, `icon.svg`, `sw.js`: instalação no celular e uso sem internet
 
