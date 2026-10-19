@@ -333,6 +333,13 @@ nav.tabs button[aria-current="page"] { color: var(--sign); }
       <div class="muted" id="week-sum"></div>
     </div>
 
+    <div class="card" id="cofre-card">
+      <h2>Cofrinho de emergência</h2>
+      <div class="kv" id="cf-kv"></div>
+      <div class="callout" id="cf-hoje"></div>
+      <button type="button" class="small ghost" id="cf-usar">Usei da reserva</button>
+    </div>
+
     <div class="card" id="maint-card">
       <h2>Manutenção</h2>
       <div class="kv" id="mt-kv"></div>
@@ -365,6 +372,7 @@ nav.tabs button[aria-current="page"] { color: var(--sign); }
         <div class="field"><label for="p-data">Dia</label><input id="p-data" type="date"></div>
         <div class="field"><label for="p-meta">Meta de lucro (R$)</label><input id="p-meta" class="huge" inputmode="decimal" placeholder="300"></div>
       </div>
+      <div class="field"><label for="p-res">Reserva de emergência (R$)</label><input id="p-res" inputmode="decimal" placeholder="30"><span class="hint">Valor que você guarda todo dia, fora da meta. Deixe 0 se não guardar.</span></div>
     </div>
     <div class="card">
       <h2>Gastos do dia</h2>
@@ -529,6 +537,8 @@ nav.tabs button[aria-current="page"] { color: var(--sign); }
         <span class="hint" id="comb-hint"></span>
       </div>
       <div class="callout" id="s-real" hidden></div>
+      <h2>Reserva de emergência</h2>
+      <div class="field"><label for="s-resdia">Guardar por dia (R$)</label><input id="s-resdia" inputmode="decimal"><span class="hint">Vem preenchido no Planejar o dia. Use 0 para não guardar.</span></div>
       <h2>Manutenção</h2>
       <div class="row3">
         <div class="field"><label for="s-res">Reserva por km (R$)</label><input id="s-res" inputmode="decimal"><span class="hint">Para óleo, pneu e revisão</span></div>
@@ -624,7 +634,7 @@ nav.tabs button[aria-current="page"] { color: var(--sign); }
     s10: { nome: 'Diesel S10', preco: 6.80, faixa: 'de R$ 6,71 a R$ 6,89', un: 'L', kml: 12 },
     gnv: { nome: 'GNV', preco: 4.30, faixa: 'de R$ 3,89 a R$ 4,74', un: 'm³', kml: 13 },
   };
-  const DEFAULTS = { meta: 300, metaSemana: 1500, metaMes: 6000, min: 1.8, kml: 11, preco: 6.36, combTipo: 'gasolina', tema: 'auto', letra: 'normal', ultimoApp: 'Uber', modoComb: 'abast', res: 0.12, oleoInt: 5000, oleoUlt: null, oleoData: null };
+  const DEFAULTS = { meta: 300, metaSemana: 1500, metaMes: 6000, min: 1.8, kml: 11, preco: 6.36, combTipo: 'gasolina', tema: 'auto', letra: 'normal', ultimoApp: 'Uber', modoComb: 'abast', res: 0.12, oleoInt: 5000, oleoUlt: null, oleoData: null, reservaDia: 30 };
   const APPS = ['Uber', '99', 'inDrive', 'Particular', 'Outro'];
   const FUEL = 'Combustível';
   const CATS = [FUEL, 'Alimentação', 'Lavagem', 'Pedágio', 'Estacionamento', 'Manutenção', 'Aluguel do carro', 'Celular / internet', 'Outros'];
@@ -701,13 +711,15 @@ nav.tabs button[aria-current="page"] { color: var(--sign); }
       odo += kmDia;
     }
     e.push({ id: uid(), date: day(-12), type: 'gasto', cat: 'Manutenção', valor: 180, nota: 'troca de óleo' });
+    const cf = [...new Set(e.filter((x) => x.type === 'jornada').map((x) => x.date))].map((d) => ({ id: uid(), date: d, valor: 30, nota: '' }));
+    cf.push({ id: uid(), date: day(-8), valor: -120, nota: 'pneu furado' });
     // hoje: jornada em andamento e corridas uma a uma
     const t0 = Date.now() - 3.2 * 3.6e6;
     const hoje = [[18.4, 'Uber', 7], [12.9, '99', 5], [24.7, 'Uber', 11], [15.2, 'Uber', 6], [21.3, 'inDrive', 9], [16.8, '99', 7]];
     hoje.forEach(([v, app, km]) => e.push({ id: uid(), date: dayKey(), type: 'ganho', app, valor: v, corridas: 1, km, horas: 0 }));
     e.push({ id: uid(), date: dayKey(), type: 'abast', valor: 100, litros: 15.9, odo });
     e.push({ id: uid(), date: dayKey(), type: 'gasto', cat: 'Alimentação', valor: 14, nota: 'café' });
-    return { settings: { ...DEFAULTS, oleoUlt: 83100, oleoData: day(-31) }, entries: e, shift: { start: t0, odo }, sample: true, onboarded: true };
+    return { settings: { ...DEFAULTS, oleoUlt: 83100, oleoData: day(-31) }, entries: e, cofre: cf, shift: { start: t0, odo }, sample: true, onboarded: true };
   }
 
   // ---------- cálculos ----------
@@ -824,15 +836,15 @@ nav.tabs button[aria-current="page"] { color: var(--sign); }
     const s = state.settings;
     const t = dayStats(dayKey());
     $('h-lucro').textContent = brl(t.lucro);
-    const meta = dayMeta(dayKey());
-    $('h-meta').textContent = brl0(meta);
-    setRoad('h-road', 'h-fill', pct(t.lucro, meta));
+    const meta = dayMeta(dayKey()), reserva = dayReserva(dayKey()), alvo = meta + reserva;
+    $('h-meta').textContent = brl0(meta) + (reserva ? ' + ' + brl0(reserva) : '');
+    setRoad('h-road', 'h-fill', pct(t.lucro, alvo));
 
-    const r = ridesNeeded(meta - t.lucro);
+    const r = ridesNeeded(alvo - t.lucro);
     let need;
-    if (r.done) need = 'Meta batida! 🎉<small>Você passou ' + brl(t.lucro - meta) + ' da meta de hoje.</small>';
-    else if (r.loss) need = 'Faltam ' + brl(meta - t.lucro) + '<small>Seu ganho médio por corrida não cobre o combustível. Revise o mínimo por km.</small>';
-    else need = 'Faltam ' + r.n + ' corrida' + (r.n > 1 ? 's' : '') + '<small>Faturar mais ' + brl(meta - t.lucro) + ' (meta + gastos) · cerca de ' + hm(r.horas) + ' de trabalho</small>';
+    if (r.done) need = 'Meta batida! 🎉<small>Você passou ' + brl(t.lucro - alvo) + ' da meta de hoje' + (reserva ? ', já contando a reserva' : '') + '.</small>';
+    else if (r.loss) need = 'Faltam ' + brl(alvo - t.lucro) + '<small>Seu ganho médio por corrida não cobre o combustível. Revise o mínimo por km.</small>';
+    else need = 'Faltam ' + r.n + ' corrida' + (r.n > 1 ? 's' : '') + '<small>Faturar mais ' + brl(alvo - t.lucro) + ' (meta' + (reserva ? ' + reserva' : '') + ' + gastos) · cerca de ' + hm(r.horas) + ' de trabalho</small>';
     renderPlanBar(t, meta);
     $('h-need').innerHTML = need;
 
@@ -873,6 +885,7 @@ nav.tabs button[aria-current="page"] { color: var(--sign); }
     $('week-sum').innerHTML = 'Lucro em 7 dias: <b>' + brl(tot) + '</b> · meta do dia batida em <b>' + hit + '</b> de 7';
 
     renderDay();
+    renderCofre();
     renderMaint();
   }
 
@@ -880,7 +893,8 @@ nav.tabs button[aria-current="page"] { color: var(--sign); }
     const p = dayPlan(dayKey()), bar = $('plan-bar');
     if (p) {
       const g = (p.costIds || []).map((id) => state.entries.find((e) => e.id === id)).filter(Boolean).reduce((s, e) => s + e.valor, 0);
-      bar.innerHTML = '<div class="txt"><b>Plano: ' + p.apps.map(esc).join(' · ') + '</b><span class="muted">Meta ' + brl0(meta) + ' + gastos ' + brl0(g) + ' = fazer <b>' + brl0(meta + g) + '</b></span></div><button type="button" class="small" data-plan>Editar</button>';
+      const rs = dayReserva(dayKey());
+      bar.innerHTML = '<div class="txt"><b>Plano: ' + p.apps.map(esc).join(' · ') + '</b><span class="muted">Meta ' + brl0(meta) + (rs ? ' + reserva ' + brl0(rs) : '') + ' + gastos ' + brl0(g) + ' = fazer <b>' + brl0(meta + rs + g) + '</b></span></div><button type="button" class="small" data-plan>Editar</button>';
     } else {
       bar.innerHTML = '<div class="txt"><b>Sem plano para hoje</b><span class="muted">Escolha os apps, a meta e os gastos do dia.</span></div><button type="button" class="small primary" data-plan>Planejar o dia</button>';
     }
@@ -905,6 +919,42 @@ nav.tabs button[aria-current="page"] { color: var(--sign); }
     const txt = dayText(viewDay);
     $('wa-day').href = 'https://wa.me/?text=' + encodeURIComponent(txt);
   }
+
+  // ---------- cofrinho de emergência ----------
+  const cofre = () => state.cofre || (state.cofre = []);
+  const cofreSaldo = () => cofre().reduce((s, c) => s + c.valor, 0);
+  const cofreDia = (key) => cofre().filter((c) => c.date === key && c.valor > 0).reduce((s, c) => s + c.valor, 0);
+  const cofreEm = (keys) => { const set = new Set(keys); return cofre().filter((c) => set.has(c.date) && c.valor > 0).reduce((s, c) => s + c.valor, 0); };
+  function renderCofre() {
+    const today = dayKey(), rs = dayReserva(today), now = new Date();
+    const mes = cofreEm(monthKeys(now.getFullYear(), now.getMonth(), true));
+    $('cf-kv').innerHTML = cell('Saldo guardado', brl(cofreSaldo())) + cell('Guardado no mês', brl(mes));
+    const box = $('cf-hoje'), feito = cofreDia(today);
+    if (feito > 0) {
+      box.className = 'callout good';
+      box.innerHTML = '<b class="state">✓ Guardado hoje: ' + brl(feito) + '</b><span>Seu cofrinho agradece.</span><button type="button" class="small ghost" data-cf-undo>Desfazer</button>';
+    } else if (rs > 0) {
+      box.className = 'callout';
+      box.innerHTML = '<span>Meta de hoje: guardar <b>' + brl(rs) + '</b> para emergências.</span><button type="button" class="small primary" data-cf-save>Guardei ' + brl0(rs) + ' hoje</button>';
+    } else {
+      box.className = 'callout';
+      box.innerHTML = '<span class="muted">Defina quanto guardar por dia no Planejar o dia ou em Ajustes.</span>';
+    }
+    const recent = cofre().filter((c) => c.valor < 0).slice(-1)[0];
+    $('cf-usar').textContent = recent ? 'Usei da reserva (última: ' + brl(-recent.valor) + (recent.nota ? ', ' + recent.nota : '') + ')' : 'Usei da reserva';
+  }
+  $('cofre-card').addEventListener('click', (ev) => {
+    const today = dayKey();
+    if (ev.target.closest('[data-cf-save]')) {
+      leaveSample();
+      cofre().push({ id: uid(), date: today, valor: dayReserva(today), nota: '' });
+      save(); renderAll(); toast('Guardado! Saldo do cofrinho: ' + brl(cofreSaldo()));
+    } else if (ev.target.closest('[data-cf-undo]')) {
+      state.cofre = cofre().filter((c) => !(c.date === today && c.valor > 0));
+      save(); renderAll(); toast('Desfeito');
+    }
+  });
+  $('cf-usar').addEventListener('click', () => openSheet('cofre'));
 
   // ---------- manutenção ----------
   // km atual do painel: o maior registrado, ou a última troca + km rodados desde então
@@ -944,7 +994,8 @@ nav.tabs button[aria-current="page"] { color: var(--sign); }
 
   // ---------- resumos para WhatsApp ----------
   function dayText(key) {
-    const t = dayStats(key), meta = dayMeta(key), plan = dayPlan(key);
+    const t = dayStats(key), plan = dayPlan(key), guardou = cofreDia(key), rs = dayReserva(key);
+    const meta = dayMeta(key) + rs; // a meta do resumo já inclui a reserva
     const falta = meta - t.lucro;
     return ['🚗 *RodaLucro* · ' + shortDate(key),
       'Faturamento: ' + brl(t.bruto),
@@ -953,6 +1004,7 @@ nav.tabs button[aria-current="page"] { color: var(--sign); }
       '*Lucro líquido: ' + brl(t.lucro) + '*',
       t.corridas + ' corridas · ' + dec(t.km, 0) + ' km' + (t.horas > 0.05 ? ' · ' + hm(t.horas) + ' · ' + brl(t.lucro / t.horas) + '/hora' : ''),
       falta <= 0 ? '✅ Meta do dia (' + brl0(meta) + ') batida!' : '🎯 Meta ' + brl0(meta) + ': ' + (key === dayKey() ? 'faltam ' : 'faltaram ') + brl(falta),
+      guardou ? '🐷 Guardei ' + brl(guardou) + ' na reserva de emergência' : '',
       plan ? 'Apps: ' + plan.apps.join(', ') : ''].filter(Boolean).join('\n');
   }
   function monthText() {
@@ -1009,7 +1061,7 @@ nav.tabs button[aria-current="page"] { color: var(--sign); }
     $('s-meta').value = dec(s.meta, 2); $('s-metasem').value = dec(s.metaSemana, 2); $('s-metames').value = dec(s.metaMes, 2);
     $('s-min').value = dec(s.min, 2); $('s-kml').value = dec(s.kml, 1); $('s-preco').value = dec(s.preco, 2);
     $('s-tipo').value = s.combTipo; tipoLabels(s.combTipo);
-    $('s-res').value = dec(s.res, 2); $('s-oleoint').value = dec(s.oleoInt, 0); $('s-oleoult').value = s.oleoUlt ? dec(s.oleoUlt, 0) : '';
+    $('s-resdia').value = dec(s.reservaDia || 0, 2); $('s-res').value = dec(s.res, 2); $('s-oleoint').value = dec(s.oleoInt, 0); $('s-oleoult').value = s.oleoUlt ? dec(s.oleoUlt, 0) : '';
     previewAjustes();
     const r = realKml(), box = $('s-real');
     if (r) {
@@ -1120,6 +1172,9 @@ nav.tabs button[aria-current="page"] { color: var(--sign); }
   // ---------- planejar o dia ----------
   const dayPlan = (key) => (state.plans || {})[key] || null;
   const dayMeta = (key) => { const p = dayPlan(key); return p && p.meta > 0 ? p.meta : state.settings.meta; };
+  const dayReserva = (key) => { const p = dayPlan(key); return p && p.reserva != null ? p.reserva : state.settings.reservaDia || 0; };
+  // alvo do dia: lucro da meta + o que vai para o cofrinho
+  const dayTarget = (key) => dayMeta(key) + dayReserva(key);
   let planDate = dayKey();
   function openPlan(key) {
     planDate = key || dayKey();
@@ -1128,6 +1183,7 @@ nav.tabs button[aria-current="page"] { color: var(--sign); }
     $('p-apps').innerHTML = APPS.map((a) => '<button type="button" data-papp="' + a + '" aria-pressed="' + apps.includes(a) + '">' + a + '</button>').join('');
     $('p-data').value = planDate;
     $('p-meta').value = dec(p ? p.meta : state.settings.meta, 2);
+    $('p-res').value = dec(p && p.reserva != null ? p.reserva : state.settings.reservaDia, 2);
     const costs = p ? (p.costIds || []).map((id) => state.entries.find((e) => e.id === id)).filter(Boolean) : [];
     if (costs.length) resetLines('p', costs.map((e) => e.type === 'abast' ? [FUEL, { valor: e.valor, preco: e.litros ? e.valor / e.litros : 0, odo: e.odo }] : [e.cat, { valor: e.valor, nota: e.nota }]));
     else resetLines('p', [[FUEL, {}], ['Alimentação', { nota: 'café da manhã' }], ['Alimentação', { nota: 'almoço' }]]);
@@ -1135,14 +1191,14 @@ nav.tabs button[aria-current="page"] { color: var(--sign); }
     go('plano');
   }
   function planNumbers() {
-    const meta = num($('p-meta').value);
+    const meta = num($('p-meta').value), reserva = Math.max(0, num($('p-res').value) || 0);
     const gastos = readLines('p').reduce((s, l) => s + (l.valor > 0 ? l.valor : 0), 0);
     const a = averages(), byKm = state.settings.modoComb === 'km';
     const lc = byKm ? a.ticket - a.kmCorrida * custoKm() : a.ticket;
-    if (!(meta > 0) || lc <= 0) return { meta, gastos, ok: false };
-    const n = Math.ceil((meta + gastos) / lc);
+    if (!(meta > 0) || lc <= 0) return { meta, reserva, gastos, ok: false };
+    const n = Math.ceil((meta + reserva + gastos) / lc);
     const comb = byKm ? n * a.kmCorrida * custoKm() : 0;
-    return { meta, gastos, comb, fazer: meta + gastos + comb, n, horas: n * a.horasCorrida, km: n * a.kmCorrida, ticket: a.ticket, ok: true };
+    return { meta, reserva, gastos, comb, fazer: meta + reserva + gastos + comb, n, horas: n * a.horasCorrida, km: n * a.kmCorrida, ticket: a.ticket, ok: true };
   }
   function renderPlanResult() {
     const r = planNumbers(), box = $('p-result');
@@ -1150,7 +1206,7 @@ nav.tabs button[aria-current="page"] { color: var(--sign); }
     if (!r.ok) { box.innerHTML = '<span class="label">Resultado</span><div class="need">Digite a sua meta de lucro<small>e os gastos do dia para ver quanto precisa fazer.</small></div>'; return; }
     box.innerHTML = '<span class="label">Para lucrar ' + brl(r.meta) + ' limpo, você precisa fazer</span>' +
       '<div class="big">' + brl(r.fazer) + '</div>' +
-      '<div class="plan-eq num">' + brl(r.meta) + ' de meta + ' + brl(r.gastos) + ' de gastos' + (r.comb ? ' + ' + brl(r.comb) + ' de combustível (km)' : '') + '</div>' +
+      '<div class="plan-eq num">' + brl(r.meta) + ' de meta' + (r.reserva ? ' + ' + brl(r.reserva) + ' de reserva' : '') + ' + ' + brl(r.gastos) + ' de gastos' + (r.comb ? ' + ' + brl(r.comb) + ' de combustível (km)' : '') + '</div>' +
       '<div class="need">≈ ' + r.n + ' corridas<small>cerca de ' + hm(r.horas) + ' de trabalho e ' + dec(r.km, 0) + ' km · ticket médio de ' + brl(r.ticket) + '</small></div>';
   }
   function savePlan(startShift) {
@@ -1173,7 +1229,7 @@ nav.tabs button[aria-current="page"] { color: var(--sign); }
       } else state.entries.push({ id, date: key, type: 'gasto', cat: l.cat, valor: l.valor, nota: l.nota });
     });
     state.plans = state.plans || {};
-    state.plans[key] = { apps, meta, costIds };
+    state.plans[key] = { apps, meta, reserva: r.reserva || 0, costIds };
     state.settings.planApps = apps;
     if (!apps.includes(state.settings.ultimoApp)) state.settings.ultimoApp = apps[0];
     if (startShift && !state.shift && key === dayKey()) state.shift = { start: Date.now(), odo: null };
@@ -1182,6 +1238,7 @@ nav.tabs button[aria-current="page"] { color: var(--sign); }
   }
   $('p-apps').addEventListener('click', (ev) => { const b = ev.target.closest('[data-papp]'); if (b) b.setAttribute('aria-pressed', b.getAttribute('aria-pressed') !== 'true'); });
   $('p-meta').addEventListener('input', renderPlanResult);
+  $('p-res').addEventListener('input', renderPlanResult);
   $('p-data').addEventListener('change', () => { const k = $('p-data').value; if (k && dayPlan(k)) openPlan(k); });
   $('p-start').addEventListener('click', () => savePlan(true));
   $('p-save').addEventListener('click', () => savePlan(false));
@@ -1235,6 +1292,7 @@ nav.tabs button[aria-current="page"] { color: var(--sign); }
     $('m-next').disabled = isCurrent;
     const mo = sumStats(monthKeys(rep.y, rep.m, isCurrent));
 
+    const moCofre = cofreEm(monthKeys(rep.y, rep.m, isCurrent));
     $('r-lucro').textContent = brl(mo.lucro);
     setRoad('r-road', 'r-fill', pct(mo.lucro, s.metaMes));
     const falta = s.metaMes - mo.lucro;
@@ -1245,7 +1303,7 @@ nav.tabs button[aria-current="page"] { color: var(--sign); }
       tile('Corridas', String(mo.corridas)) + tile('Km', dec(mo.km, 0)) + tile('Horas', hm(mo.horas)) +
       tile('Lucro / hora', mo.horas ? brl(mo.lucro / mo.horas) : '—') + tile('Lucro / km', mo.km ? brl(mo.lucro / mo.km) : '—') +
       tile('Melhor dia', mo.best ? new Date(mo.best.key + 'T12:00').toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }) + ' · ' + brl0(mo.best.lucro) : '—') +
-      tile('Reserva manutenção', brl(mo.km * s.res)) + tile('Abastecimentos', brl(mo.abast)) + tile('Gastos extras', brl(mo.gastos));
+      tile('Reserva manutenção', brl(mo.km * s.res)) + tile('Cofrinho no mês', brl(moCofre)) + tile('Gastos extras', brl(mo.gastos));
 
     const apps = Object.entries(mo.apps).sort((a, b) => b[1].bruto - a[1].bruto);
     const maxApp = apps.length ? apps[0][1].bruto : 1;
@@ -1260,7 +1318,8 @@ nav.tabs button[aria-current="page"] { color: var(--sign); }
       cats.map(([c, v]) => '<tr><td>' + esc(c) + '</td><td>−' + brl(v) + '</td></tr>').join('') +
       '<tr class="total"><td>Lucro líquido</td><td>' + brl(mo.lucro) + '</td></tr>' +
       '<tr><td>Guardar para manutenção (' + brl(s.res) + '/km)</td><td>−' + brl(mo.km * s.res) + '</td></tr>' +
-      '<tr class="total"><td>Livre para gastar</td><td>' + brl(mo.lucro - mo.km * s.res) + '</td></tr>';
+      '<tr><td>Guardado no cofrinho de emergência</td><td>−' + brl(moCofre) + '</td></tr>' +
+      '<tr class="total"><td>Livre para gastar</td><td>' + brl(mo.lucro - mo.km * s.res - moCofre) + '</td></tr>';
     $('wa-month').href = 'https://wa.me/?text=' + encodeURIComponent(monthText());
 
     const rk = realKml();
@@ -1292,7 +1351,7 @@ nav.tabs button[aria-current="page"] { color: var(--sign); }
     document.querySelectorAll('[data-form]').forEach((f) => (f.hidden = f.dataset.form !== b.dataset.seg));
   }));
 
-  function leaveSample() { if (state.sample) { state.entries = []; state.plans = {}; state.shift = null; state.sample = false; } }
+  function leaveSample() { if (state.sample) { state.entries = []; state.plans = {}; state.cofre = []; state.shift = null; state.sample = false; } }
   function addEntry(e) { leaveSample(); state.entries.push({ id: uid(), ...e }); save(); renderAll(); }
 
   // folha inferior: corrida rápida e jornada
@@ -1351,6 +1410,11 @@ nav.tabs button[aria-current="page"] { color: var(--sign); }
       body.innerHTML = fld('o-odo', 'Km do painel na troca', v2(currentOdo(), 0), { mode: 'numeric', ph: '84.520' }) +
         fld('o-valor', 'Quanto pagou (opcional)', '', { ph: '180,00', hint: 'Entra como gasto de Manutenção no dia de hoje.' });
       $('sheet-ok').textContent = 'Salvar troca';
+    } else if (mode === 'cofre') {
+      $('sheet-title').textContent = 'Usar da reserva';
+      body.innerHTML = '<p class="muted">Saldo atual: <b>' + brl(cofreSaldo()) + '</b>. A retirada não entra como gasto do dia.</p>' +
+        fld('cf-valor', 'Quanto usou (R$)', '', { ph: '120,00' }) + fld('cf-nota', 'Para quê?', '', { mode: 'text', ph: 'ex.: pneu furado' });
+      $('sheet-ok').textContent = 'Registrar retirada';
     } else if (mode === 'texto') {
       $('sheet-title').textContent = 'Copie o texto';
       body.innerHTML = '<p class="muted">Selecione o texto abaixo e copie.</p><textarea id="t-text" rows="10" readonly>' + esc(arg) + '</textarea>';
@@ -1414,6 +1478,12 @@ nav.tabs button[aria-current="page"] { color: var(--sign); }
       state.entries = []; state.shift = null; state.sample = false; state.onboarded = true;
       state.plans = {};
       save(); closeSheet(); renderAll(); openPlan(dayKey()); toast('Tudo pronto! Agora planeje o seu dia');
+    } else if (sheetMode === 'cofre') {
+      const v = num($('cf-valor').value);
+      if (!(v > 0)) { toast('Informe quanto usou'); return; }
+      leaveSample();
+      cofre().push({ id: uid(), date: dayKey(), valor: -v, nota: $('cf-nota').value.trim() });
+      save(); closeSheet(); renderAll(); toast('Retirada registrada · saldo ' + brl(cofreSaldo()));
     } else if (sheetMode === 'oleo') {
       const odo = num($('o-odo').value), valor = num($('o-valor').value);
       if (!(odo > 0)) { toast('Informe o km do painel'); return; }
@@ -1429,7 +1499,7 @@ nav.tabs button[aria-current="page"] { color: var(--sign); }
       state.settings.ultimoApp = app;
       addEntry({ date: dayKey(), type: 'ganho', app, valor, corridas: 1, km: km > 0 ? km : +averages().kmCorrida.toFixed(1), horas: 0 });
       closeSheet();
-      const t = dayStats(dayKey()), r = ridesNeeded(dayMeta(dayKey()) - t.lucro);
+      const t = dayStats(dayKey()), r = ridesNeeded(dayTarget(dayKey()) - t.lucro);
       toast('Corrida salva · ' + (r.done ? 'meta do dia batida! 🎉' : r.n ? 'faltam ' + r.n + ' corridas' : 'lucro hoje ' + brl(t.lucro)));
     } else if (sheetMode === 'iniciar') {
       leaveSample();
@@ -1539,6 +1609,7 @@ nav.tabs button[aria-current="page"] { color: var(--sign); }
     const res = num($('s-res').value), oi = num($('s-oleoint').value), ou = num($('s-oleoult').value);
     if (!(res >= 0) || !(oi > 0)) { toast('Confira a reserva por km e o intervalo do óleo'); return; }
     v.res = res; v.oleoInt = oi;
+    const rd = num($('s-resdia').value); v.reservaDia = rd > 0 ? rd : 0;
     if (ou > 0 && ou !== state.settings.oleoUlt) { v.oleoUlt = ou; v.oleoData = dayKey(); } else if (!(ou > 0)) { v.oleoUlt = null; v.oleoData = null; }
     const hoje = dayPlan(dayKey());
     if (hoje && v.meta !== state.settings.meta) hoje.meta = v.meta; // a meta nova vale também para o plano de hoje
@@ -1574,7 +1645,7 @@ nav.tabs button[aria-current="page"] { color: var(--sign); }
   $('m-prev').addEventListener('click', () => { rep.m--; if (rep.m < 0) { rep.m = 11; rep.y--; } renderRelatorio(); });
   $('m-next').addEventListener('click', () => { rep.m++; if (rep.m > 11) { rep.m = 0; rep.y++; } renderRelatorio(); });
 
-  $('btn-clear-sample').addEventListener('click', () => { state.entries = []; state.shift = null; state.sample = false; state.settings.oleoUlt = null; state.settings.oleoData = null; save(); renderAll(); openSheet('onboard'); });
+  $('btn-clear-sample').addEventListener('click', () => { state.cofre = []; state.entries = []; state.shift = null; state.sample = false; state.settings.oleoUlt = null; state.settings.oleoData = null; save(); renderAll(); openSheet('onboard'); });
   $('btn-sample').addEventListener('click', () => { const keep = state.settings; state = sampleState(); state.settings.tema = keep.tema; state.settings.letra = keep.letra; save(); renderAll(); toast('Exemplo carregado'); go('hoje'); });
   $('btn-wipe').addEventListener('click', () => { $('wipe-confirm').hidden = false; });
   $('btn-wipe-no').addEventListener('click', () => { $('wipe-confirm').hidden = true; });
@@ -1591,6 +1662,7 @@ nav.tabs button[aria-current="page"] { color: var(--sign); }
   state.entries = state.entries || [];
   state.shift = state.shift || null;
   state.plans = state.plans || {};
+  state.cofre = state.cofre || [];
   $('g-app').innerHTML = APPS.map((a) => '<option>' + a + '</option>').join('');
   ['g-data', 'x-data'].forEach((id) => ($(id).value = dayKey()));
   resetLines();
